@@ -37,6 +37,23 @@ Los endpoints internos son **experimentales**: pueden cambiar, exigir permisos o
 
 Se han utilizado como referencias de protocolo, sin incorporar su código ni credenciales a QuotaDock.
 
+## Campos de restablecimiento investigados
+
+| Familia | Fuente del reinicio | Tratamiento |
+| --- | --- | --- |
+| Codex | `rate_limit.*.reset_at` (Unix segundos); si falta, `reset_after_seconds` | Preferir el absoluto; el relativo se ancla a la recepción y se marca aproximado. |
+| Claude | `five_hour.resets_at`, `seven_day.resets_at` | ISO/RFC3339 con zona explícita. |
+| OpenCode Go | `usage.rolling/weekly/monthly.resetsAt` | ISO/RFC3339 con zona explícita. |
+| Kimi | `limits[].detail.resetTime` y variantes `resetAt`, `reset_at`, `reset_time`; igual en `usage` o `usages.limit_month_total` | Asociar al cupo concreto; no inventar semana en las respuestas mensuales. |
+| MiniMax | `model_remains[].end_time`, `weekly_end_time` | Unix milisegundos del bucket de texto `general`. |
+| Z.AI / Zhipu | `data.limits[].nextResetTime` | Unix milisegundos; conservar la clasificación por `unit`, no por orden. |
+| Copilot | `quota_reset_date_utc` o `quota_reset_date` | Leer timestamp explícito si existe; una fecha sola no prueba una hora de reinicio. |
+| Gemini CLI | `buckets[].resetTime` | Mostrar solo el reinicio del bucket limitante; si varios empatados tienen horas diferentes, no hay un único reinicio de familia. |
+
+La investigación se apoya en los contratos oficiales y referencias comunitarias enlazados arriba; no demuestra acceso a todas las cuentas. Estos campos son opcionales y algunos pertenecen a APIs internas. Se distingue la hora comunicada de una predicción: las ventanas móviles no se renuevan localmente sumando cinco horas o siete días.
+
+Las horas válidas se presentan en hora peninsular española (`Europe/Madrid`, CET/CEST). Las fechas sin hora o zona se conservan como tales. Un reinicio ya pasado se presenta como dato anterior, no como el próximo.
+
 ## Evaluados y no habilitados
 
 | Proveedor | Motivo |

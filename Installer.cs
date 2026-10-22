@@ -8,15 +8,25 @@ using UsageTray;
 
 internal sealed class Installer : Form
 {
-    private readonly CheckBox startup = new CheckBox { Text = "Abrir QuotaDock al iniciar Windows", Left = 24, Top = 95, Width = 330 };
-    private readonly CheckBox launch = new CheckBox { Text = "Abrir QuotaDock al finalizar", Checked = true, Left = 24, Top = 125, Width = 330 };
-    private readonly Button install = new Button { Text = "Instalar", Left = 245, Top = 175, Width = 110, Height = 32 };
+    private readonly CheckBox startup = new CheckBox { Text = "Abrir QuotaDock al iniciar Windows", Left = 24, Top = 130, Width = 330 };
+    private readonly CheckBox launch = new CheckBox { Text = "Abrir QuotaDock al finalizar", Checked = true, Left = 24, Top = 160, Width = 330 };
+    private readonly Button install = new Button { Text = "Instalar", Left = 245, Top = 215, Width = 110, Height = 32 };
     private Installer()
     {
-        Text = "QuotaDock 1.2.0"; ClientSize = new Size(390, 230);
+        Text = "QuotaDock 1.3.0"; ClientSize = new Size(390, 270);
         FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false;
         StartPosition = FormStartPosition.CenterScreen; Font = new Font("Segoe UI", 9);
-        Controls.Add(new Label { Text = "Un icono, dos barras y todos tus proveedores.\nInstalación para tu usuario, sin administrador.\nPulsa el icono para cambiar de proveedor.", Left = 24, Top = 16, Width = 350, Height = 65 });
+        Controls.Add(new Label { Text = "Un icono, dos barras y todos tus proveedores.\nInstalación por usuario en %LOCALAPPDATA%\\QuotaDock.\nSolo consulta los proveedores que actives. Sin telemetría.", Left = 24, Top = 16, Width = 350, Height = 70 });
+        var policies = new LinkLabel { Text = "Licencia MIT y política de privacidad", Left = 24, Top = 96, Width = 340, Height = 25 };
+        policies.LinkClicked += delegate {
+            using (var dialog = new Form { Text = "QuotaDock · licencia y privacidad", ClientSize = new Size(650, 470), StartPosition = FormStartPosition.CenterParent })
+            {
+                var text = new TextBox { Multiline = true, ReadOnly = true, ScrollBars = ScrollBars.Vertical, Dock = DockStyle.Fill,
+                    Text = System.Text.Encoding.UTF8.GetString(Resource("LICENSE")) + "\r\n\r\n" + System.Text.Encoding.UTF8.GetString(Resource("PRIVACY.md")) };
+                dialog.Controls.Add(text); dialog.ShowDialog(this);
+            }
+        };
+        Controls.Add(policies);
         Controls.AddRange(new Control[] { startup, launch, install });
         install.Click += delegate {
             install.Enabled = false;

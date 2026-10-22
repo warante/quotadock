@@ -6,7 +6,9 @@
 
 Tus cuotas de IA junto al reloj, sin llenar la bandeja de iconos. Pulsa para cambiar de proveedor; los demás siguen actualizándose en segundo plano.
 
-**1.2.0 · Windows 10/11 · Portable o instalable · Sin administrador**
+**Windows 10/11 · MIT · Portable o instalable · Sin administrador**
+
+Rama de desarrollo: **1.3.0**, con consulta de restablecimientos. La última versión publicada está en **Releases**; las funcionalidades nuevas de `main` no se deben atribuir a una release anterior.
 
 <p align="center">
   <img src="docs/images/quotadock-preview.png" alt="QuotaDock con un único icono junto al reloj y pestañas para cambiar entre OpenAI, Claude y Kimi" width="880">
@@ -34,26 +36,27 @@ También puedes cambiar desde **clic derecho → Proveedor visible**. Las flecha
 - **Identificación:** banda de color por proveedor y nombre en el tooltip y el menú.
 - **Diseño moderno y ligero:** panel redondeado, pestañas con estados de foco y hover, tipografía Segoe UI, barras suaves y menú oscuro. Dibujo nativo con GDI+, sin navegador integrado, librerías externas ni bucles de animación. Respeta el alto contraste de Windows.
 - **Avisos opcionales:** umbral de 5%, 10%, 20% o 25%, desactivados por defecto; no repiten el aviso mientras la cuota siga baja.
+- **Restablecimientos:** pasa el ratón sobre una barra o abre el menú **Restablecimientos** para consultar la hora que devuelve el proveedor. Se muestra en hora peninsular española, con CET/CEST automático, sin inventar fechas.
 - **Más proveedores:** OpenCode Go, Kimi, MiniMax, Z.AI/Zhipu, Copilot y Gemini CLI, además de Codex y Claude.
 
 ## Descargar
 
-En **Releases → v1.2.0** encontrarás los siguientes artefactos. También se generan en `dist\v1.2.0` al compilar:
+En **[Releases](https://github.com/warante/quotadock/releases/latest)** encontrarás la última versión publicada. Al compilar `main`, los artefactos de desarrollo se generan en `dist\v1.3.0`:
 
 | Artefacto | Uso |
 | --- | --- |
-| `QuotaDock-1.2.0-Setup.exe` | Instalar para tu usuario con inicio automático opcional. |
-| `QuotaDock-1.2.0-Windows-Portable.zip` | Descomprimir y abrir `QuotaDock.exe`. |
+| `QuotaDock-<versión>-Setup.exe` | Instalar para tu usuario con inicio automático opcional. |
+| `QuotaDock-<versión>-Windows-Portable.zip` | Descomprimir y abrir `QuotaDock.exe`. |
 | `QuotaDock.exe` | Ejecutable portable individual, sin dependencias externas. |
 | `SHA256SUMS.txt` | Huellas SHA-256 del instalador, ZIP y aplicación. |
 
-Para descargar necesitas acceso al repositorio privado. Los binarios **siguen sin firma** hasta disponer de un certificado de firma de código válido. La compilación admite firma Authenticode con timestamp y puede exigirla; no se presenta un certificado autofirmado como una firma de confianza. En un equipo administrado, solicita aprobación si Windows bloquea la ejecución.
+Los binarios publicados **siguen sin firma** hasta disponer de una firma de código válida. Preparar el proyecto para SignPath no significa que esté admitido ni que sus releases estén firmadas. En un equipo administrado, solicita aprobación si Windows bloquea la ejecución.
 
 El instalador usa `%LOCALAPPDATA%\QuotaDock`, crea un acceso en Inicio y registra la desinstalación por usuario. **Abrir QuotaDock al finalizar** está activado por defecto. Si Windows impide abrirlo, se informa de que está instalado pero bloqueado: eso no se confunde con un fallo de instalación. No descarga paquetes, no instala servicios y no necesita administrador. Si falla la instalación, intenta restaurar sus archivos y configuración anteriores. Cierra QuotaDock antes de actualizar.
 
 ## Primer uso
 
-1. Abre `QuotaDock.exe`. Se activa OpenAI/Codex por defecto.
+1. Abre `QuotaDock.exe`. En una instalación nueva de 1.3.0 no se activa ningún proveedor hasta que tú lo elijas; una actualización conserva los que ya habías activado.
 2. Clic derecho → **Proveedores** para activar los que utilices. Todos comparten un único icono. Si desactivas todos, ese mismo icono abre el menú para reactivarlos.
 3. Configura la sesión o clave de cada proveedor como se indica abajo.
 4. Si el icono está oculto en **^**, arrástralo junto al reloj.
@@ -102,11 +105,22 @@ Los ajustes no secretos se guardan en `%APPDATA%\QuotaDock\settings.json`, y la 
 - Los avisos están apagados por defecto. Se envía uno al cruzar el umbral por ejecución; se rearma después de recuperar más de dos puntos porcentuales sobre él. Windows puede silenciarlos con No molestar.
 - La opción **Priorizar mes en la segunda barra** muestra el cupo mensual cuando exista; no cambia una cuota mensual por una semanal ficticia. No se indican reinicios calculados localmente.
 
+### Hora de restablecimiento
+
+Las dos barras siguen sin texto adicional permanente. En 1.3.0, posa el ratón sobre la fila de una cuota o entra en **clic derecho → Restablecimientos · hora peninsular**. La información se actualiza al consultar el proveedor; no hay un temporizador de cuenta atrás.
+
+- Los timestamps absolutos se convierten a `Europe/Madrid`, incluidos los cambios CET/CEST y la hora repetida de octubre.
+- Si solo hay segundos restantes, se anclan a la recepción de la respuesta y se etiquetan como **aproximados**.
+- Una fecha sin hora, como las que puede devolver Copilot, se mantiene como fecha comunicada, sin asumir medianoche ni una zona horaria.
+- Los reinicios pasados se marcan como pendientes de actualizar. Datos ausentes, unidades inválidas o varios reinicios incompatibles dentro de una familia no generan una hora ficticia.
+
+Consulta la matriz de campos y fuentes en [PROVIDERS.md](PROVIDERS.md). El servidor puede modificar sus límites; una hora comunicada no es una garantía de disponibilidad futura.
+
 ## Inicio automático y migración
 
 Activa **Iniciar con Windows** desde el menú o el instalador. Se usa únicamente `HKCU\…\Run\QuotaDock`. En modo portable apunta a la ruta actual: si mueves el ejecutable, desactiva y reactiva la opción desde su nueva ubicación.
 
-La versión 1.2.0 conserva tus proveedores activados, claves cifradas y esperas. La primera vez elige el primer proveedor activado; después recuerda el que selecciones. Cierra la versión anterior antes de instalar para sustituir el ejecutable. No necesitas repetir el inicio de sesión.
+Las versiones nuevas conservan tus proveedores activados, claves cifradas y esperas. La primera vez eligen el primer proveedor activado; después recuerdan el que selecciones. Cierra la versión anterior antes de instalar para sustituir el ejecutable. No necesitas repetir el inicio de sesión salvo que haya caducado.
 
 No se modifican ni borran los ejecutables independientes de 1.0.0 ni sus accesos de inicio. Si aún los usas, cierra sus iconos y retira sus accesos de `shell:startup` para evitar duplicar consultas.
 
@@ -130,11 +144,12 @@ En modo portable, desactiva primero el inicio automático, sal y borra el ejecut
 Requisitos: Windows 10/11 y .NET Framework 4.x; sin Python, Node, NuGet ni SDK moderno de .NET.
 
 ```powershell
-.\build.ps1          # dist\v1.2.0\QuotaDock.exe
+.\build.ps1          # dist\v1.3.0\QuotaDock.exe
 .\test.ps1           # pruebas sintéticas, HTTP simulado, DPAPI e instalación aislada
 .\release.ps1        # aplicación, instalador, ZIP y SHA-256
 .\package-test.ps1   # recursos del instalador y desinstalación en sandbox
 .\privacy-check.ps1  # fuentes y artefactos, sin imprimir coincidencias sensibles
+.\audit-history.ps1  # historial completo, refs y reflogs, sin imprimir secretos
 .\verify.ps1         # todas las comprobaciones anteriores
 ```
 
@@ -146,10 +161,26 @@ Firma opcional con un certificado **de confianza** de firma de código en `Cert:
 
 Se firma primero la aplicación, después se incrusta en el instalador, se firma el instalador y se generan los hashes. Sin certificado, `-RequireSigned` falla: no se publica una firma falsa. La adquisición y custodia del certificado quedan a cargo del propietario del proyecto.
 
-`ci/windows.yml` contiene la plantilla de pruebas y artefactos de GitHub Actions. **No está activada**, porque no se completó la autorización `workflow`. Para activarla, copia la plantilla a `.github/workflows/windows.yml` y súbela con ese permiso. No se incluyen claves de proveedores en CI. Como alternativa local, `.githooks/pre-push` ejecuta la verificación antes de una subida cuando configuras `git config core.hooksPath .githooks`.
+`.github/workflows/windows.yml` ejecuta las pruebas, compilación, auditorías y comprobación del kit de integración en GitHub Actions. No utiliza credenciales de proveedores. `ci/signpath.yml` sigue siendo una plantilla sin activar: prepara una firma en dos etapas únicamente tras la admisión y configuración de SignPath. Como alternativa local, `.githooks/pre-push` ejecuta la verificación antes de una subida cuando configuras `git config core.hooksPath .githooks`.
 
 Si la política de tu equipo bloquea scripts o ejecutables sin firmar, utiliza mecanismos aprobados por tu administrador; no desactives el control de aplicaciones.
 
 ## Historial
 
 [CHANGELOG.md](CHANGELOG.md) · [Fuentes y estado de proveedores](PROVIDERS.md)
+
+## Próximos pasos
+
+[Estado de las tareas](TODO.md): restablecimientos, apertura del proyecto, solicitud de firma gratuita y recursos de integración.
+
+## Open source
+
+Licencia [MIT](LICENSE). Consulta [cómo contribuir](CONTRIBUTING.md), el [código de conducta](CODE_OF_CONDUCT.md), las [notificaciones de seguridad](SECURITY.md) y los [avisos de terceros](THIRD_PARTY_NOTICES.md).
+
+## Code signing policy
+
+Consulta la [Code signing policy](docs/code-signing-policy.md), los roles de firma y la [política de privacidad](PRIVACY.md). La solicitud gratuita a SignPath está en preparación; **no hay una admisión ni un certificado concedidos**. [SIGNPATH.md](SIGNPATH.md) describe los requisitos que todavía dependen del propietario y del servicio.
+
+## Piconera Tech
+
+El [kit de integración](integrations/piconera-tech/README.md) incluye icono SVG/PNG, banners ES/EN, imagen social, textos, ficha HTML y traducciones para el porfolio de Piconera Tech. No modifica ni despliega esa web.

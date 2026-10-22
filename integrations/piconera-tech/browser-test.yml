@@ -1,0 +1,10 @@
+url: ${PREVIEW_URL}
+---
+- openLink: ${PREVIEW_URL}
+- assertVisible: "Tus cuotas de IA junto al reloj. Un icono, dos barras y tus proveedores, sin ruido."
+- tapOn: "English"
+- assertVisible: "Your AI quotas beside the clock. One icon, two bars and your providers, without the clutter."
+- assertVisible: "Open source · MIT"
+- tapOn: "Español"
+- assertVisible: "Tus cuotas de IA junto al reloj. Un icono, dos barras y tus proveedores, sin ruido."
+- assertVisible: "Código abierto · MIT"

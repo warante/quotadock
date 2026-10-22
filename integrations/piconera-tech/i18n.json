@@ -1,0 +1,16 @@
+{
+  "es": {
+    "quotadock.aria": "QuotaDock en GitHub: código y descargas para Windows",
+    "quotadock.alt": "Icono de QuotaDock",
+    "quotadock.desc": "Tus cuotas de IA junto al reloj. Un icono, dos barras y tus proveedores, sin ruido.",
+    "quotadock.banner": "assets/apps/banners/quotadock.png?v=20261022",
+    "quotadock.license": "Código abierto · MIT"
+  },
+  "en": {
+    "quotadock.aria": "QuotaDock on GitHub: source code and Windows downloads",
+    "quotadock.alt": "QuotaDock icon",
+    "quotadock.desc": "Your AI quotas beside the clock. One icon, two bars and your providers, without the clutter.",
+    "quotadock.banner": "assets/apps/banners/quotadock-en.png?v=20261022",
+    "quotadock.license": "Open source · MIT"
+  }
+}

@@ -13,9 +13,9 @@ namespace UsageTray
 {
     public sealed class Preferences
     {
-        public string[] Enabled = { "openai" };
+        public string[] Enabled = new string[0];
         public string[] Monthly = new string[0];
-        public string SelectedProvider = "openai";
+        public string SelectedProvider;
         public bool Alerts;
         public int Threshold = 10;
         public string ResolveSelection()

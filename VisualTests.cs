@@ -24,6 +24,13 @@ internal static class VisualTests
                 popup.SetProviders(new[] { Providers.Find("openai"), Providers.Find("claude"), Providers.Find("kimi") });
                 var original = new[] { new Meter("session", "5 h", 81), new Meter("weekly", "Semana", 9) };
                 popup.UpdateData(original, Color.MediumSeaGreen, "openai");
+                var tooltipNow = DateTimeOffset.Parse("2026-01-01T00:00:00Z");
+                popup.Data[0].Reset = ResetInfo.Iso("2030-06-12T10:30:00Z");
+                if (!popup.ResetTooltipAt(new Point(150, popup.BarsTop + 8), tooltipNow).Contains("12/06/2030 12:30 CEST")) throw new Exception("Reset tooltip must use Madrid time");
+                if (popup.ResetTooltipAt(new Point(150, 1), tooltipNow) != null) throw new Exception("Reset tooltip must only describe a quota row");
+                popup.Data[0].Remaining = null;
+                if (!popup.ResetTooltipAt(new Point(150, popup.BarsTop + 8), tooltipNow).Contains("no comunica")) throw new Exception("Unknown usage must not retain a stale reset tooltip");
+                popup.Data[0].Remaining = 81;
                 bool switched = false;
                 popup.ProviderSelected += id => {
                     switched = id == "claude";

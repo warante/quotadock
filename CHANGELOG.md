@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.0 — en desarrollo
+
+- Consulta de restablecimientos por cuota al pasar el ratón y desde el menú, sin recargar el panel.
+- Conversión a hora peninsular española con CET/CEST, fechas parciales explícitas y rechazo de datos inválidos, ambiguos o antiguos.
+- Licencia MIT, documentación de privacidad, contribuciones, seguridad y política de firma; solicitud a SignPath preparada, no concedida.
+- Instalación nueva sin consultas hasta activar un proveedor; las actualizaciones conservan las preferencias.
+- Licencia y privacidad disponibles en el instalador y distribución portable.
+- Auditoría de historial y releases, configuración de CI endurecida y preparación de firma en dos etapas.
+- Kit visual y textos ES/EN para integrar QuotaDock en Piconera Tech, sin modificar su web.
+
 ## 1.2.0 — 2026-10-22 (hora peninsular española)
 
 - Un único icono en la bandeja, con las dos barras del proveedor seleccionado.

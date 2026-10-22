@@ -44,13 +44,14 @@ namespace UsageTray
     {
         public string Id, Label;
         public double? Remaining;
-        public Meter(string id, string label, double? remaining) { Id = id; Label = label; Remaining = remaining; }
+        public ResetInfo Reset;
+        public Meter(string id, string label, double? remaining, ResetInfo reset = null) { Id = id; Label = label; Remaining = remaining; Reset = reset; }
     }
 
     public sealed class Snapshot
     {
         public readonly List<Meter> Meters = new List<Meter>();
-        public void Add(string id, string label, double? remaining) { Meters.Add(new Meter(id, label, remaining)); }
+        public void Add(string id, string label, double? remaining, ResetInfo reset = null) { Meters.Add(new Meter(id, label, remaining, reset)); }
         public static Snapshot Empty(string kind)
         {
             var result = new Snapshot();

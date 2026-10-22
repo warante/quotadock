@@ -1,0 +1,115 @@
+# Install as .github/workflows/signpath.yml only after SignPath admission,
+# environment protection, MFA and server-side signing policies are configured.
+name: Sign reviewed release with SignPath
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Reviewed release tag, for example v1.3.0
+        type: string
+        required: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  sign:
+    if: github.ref == 'refs/heads/main' && vars.SIGNPATH_ENABLED == 'true'
+    runs-on: windows-latest
+    environment: signpath-production
+    timeout-minutes: 60
+    steps:
+      - name: Validate tag
+        shell: powershell
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          if ($env:RELEASE_TAG -notmatch '^v[0-9]+\.[0-9]+\.[0-9]+$') { throw 'Invalid release tag' }
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ inputs.tag }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Validate tag version against source
+        shell: powershell
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          git merge-base --is-ancestor HEAD origin/main
+          if ($LASTEXITCODE -ne 0) { throw 'Release tag must belong to reviewed main history' }
+          $source = Get-Content AssemblyInfo.cs -Raw
+          if ($source -notmatch 'AssemblyInformationalVersion\("([^\"]+)"\)') { throw 'Missing version' }
+          if ('v' + $Matches[1] -ne $env:RELEASE_TAG) { throw 'Tag/version mismatch' }
+          "PRODUCT_VERSION=$($Matches[1])" >> $env:GITHUB_ENV
+          "FILE_VERSION=$($Matches[1]).0" >> $env:GITHUB_ENV
+      - name: Test and build application
+        shell: powershell
+        run: |
+          .\test.ps1
+          .\audit-history.ps1
+          .\build.ps1
+      - name: Upload unsigned application for origin verification
+        id: app
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: application-to-sign
+          path: dist/v${{ env.PRODUCT_VERSION }}/QuotaDock.exe
+          if-no-files-found: error
+      - name: Sign application (manual SignPath approval)
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG }}
+          artifact-configuration-slug: application
+          github-artifact-id: ${{ steps.app.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: signed-application
+          parameters: |
+            productVersion: "${{ env.PRODUCT_VERSION }}"
+            fileVersion: "${{ env.FILE_VERSION }}"
+      - name: Embed signed application in installer
+        shell: powershell
+        run: |
+          $app = Get-ChildItem signed-application -Filter QuotaDock.exe -File -Recurse
+          if (@($app).Count -ne 1 -or (Get-AuthenticodeSignature $app.FullName).Status -ne 'Valid') { throw 'Missing trusted application signature' }
+          Copy-Item $app.FullName "dist\v$env:PRODUCT_VERSION\QuotaDock.exe" -Force
+          .\release.ps1 -UseExistingApp -SkipLocalSigning
+      - name: Upload unsigned installer for origin verification
+        id: installer
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: installer-to-sign
+          path: dist/v${{ env.PRODUCT_VERSION }}/QuotaDock-${{ env.PRODUCT_VERSION }}-Setup.exe
+          if-no-files-found: error
+      - name: Sign installer (manual SignPath approval)
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG }}
+          artifact-configuration-slug: installer
+          github-artifact-id: ${{ steps.installer.outputs.artifact-id }}
+          wait-for-completion: true
+          output-artifact-directory: signed-installer
+          parameters: |
+            productVersion: "${{ env.PRODUCT_VERSION }}"
+            fileVersion: "${{ env.FILE_VERSION }}"
+      - name: Verify signatures, package without recompiling, audit
+        shell: powershell
+        run: |
+          $setup = Get-ChildItem signed-installer -Filter '*-Setup.exe' -File -Recurse
+          if (@($setup).Count -ne 1) { throw 'Missing signed installer' }
+          Copy-Item $setup.FullName "dist\v$($env:PRODUCT_VERSION)\QuotaDock-$($env:PRODUCT_VERSION)-Setup.exe" -Force
+          .\package.ps1 -RequireSigned
+          .\package-test.ps1
+          .\privacy-check.ps1
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: QuotaDock-${{ env.PRODUCT_VERSION }}-signed
+          path: |
+            dist/v${{ env.PRODUCT_VERSION }}/*Setup.exe
+            dist/v${{ env.PRODUCT_VERSION }}/*Portable.zip
+            dist/v${{ env.PRODUCT_VERSION }}/QuotaDock.exe
+            dist/v${{ env.PRODUCT_VERSION }}/SHA256SUMS.txt

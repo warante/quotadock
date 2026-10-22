@@ -3,3 +3,5 @@ $ErrorActionPreference = 'Stop'
 & (Join-Path $PSScriptRoot 'release.ps1')
 & (Join-Path $PSScriptRoot 'package-test.ps1')
 & (Join-Path $PSScriptRoot 'privacy-check.ps1')
+& (Join-Path $PSScriptRoot 'audit-history.ps1')
+& (Join-Path $PSScriptRoot 'integrations\piconera-tech\test.ps1')

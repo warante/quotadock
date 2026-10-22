@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="QuotaDock">
+  <rect width="512" height="512" rx="112" fill="#1b1f27"/>
+  <circle cx="244" cy="238" r="148" fill="none" stroke="#c47a52" stroke-width="30"/>
+  <path d="m346 350 67 67" fill="none" stroke="#c47a52" stroke-width="34" stroke-linecap="round"/>
+  <rect x="150" y="196" width="188" height="26" rx="13" fill="#3b4351"/>
+  <rect x="150" y="196" width="147" height="26" rx="13" fill="#66d7ac"/>
+  <rect x="150" y="254" width="188" height="26" rx="13" fill="#3b4351"/>
+  <rect x="150" y="254" width="103" height="26" rx="13" fill="#eda68a"/>
+</svg>

@@ -29,6 +29,7 @@ internal static class Tests
         string root = Path.Combine(Environment.GetEnvironmentVariable("OPENCODE_TEST_TEMP") ?? Path.GetTempPath(), "quotadock-test-" + Guid.NewGuid().ToString("N"));
         try
         {
+            Check(new Preferences().Enabled.Length == 0, "Fresh installation does not query providers without selection");
             var normal = Usage.Parse("codex", "{\"rate_limit\":{\"primary_window\":{\"used_percent\":23,\"limit_window_seconds\":18000},\"secondary_window\":{\"used_percent\":64.5,\"limit_window_seconds\":604800}}}");
             Check(Value(normal, "session") == 77 && Value(normal, "weekly") == 35.5, "Codex percentages");
             var weekly = Usage.Parse("codex", "{\"rate_limit\":{\"primary_window\":{\"used_percent\":70,\"limit_window_seconds\":604800},\"secondary_window\":null}}");
@@ -89,6 +90,7 @@ internal static class Tests
             finally { Environment.SetEnvironmentVariable("KIMI_API_KEY", env); }
             vault.Save(p, ""); Check(!vault.HasSaved(p), "Forget credentials");
             HttpTests(root).GetAwaiter().GetResult();
+            ResetTests.Run(Check);
             Check(Providers.All.All(x => new Uri(x.Endpoint).Scheme == "https") && Providers.All.Select(x => x.Id).Distinct().Count() == Providers.All.Length, "Fixed HTTPS endpoints and unique identifiers");
             Console.WriteLine("OK: " + checks + " checks; parsers, HTTP, retries, alerts, settings and encrypted credentials. No live provider requests.");
             return 0;

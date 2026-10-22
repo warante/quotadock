@@ -23,6 +23,8 @@ namespace UsageTray
         private string[] providerIds = new string[0];
         private readonly Font bodyFont = new Font("Segoe UI", 9.5f);
         private readonly Font valueFont = new Font("Segoe UI Semibold", 10);
+        private readonly ToolTip resetTip = new ToolTip { InitialDelay = 350, ReshowDelay = 100, AutoPopDelay = 15000, ShowAlways = true };
+        private string resetTipText;
         public int BarsTop { get; private set; }
         public BarsPopup()
         {
@@ -84,8 +86,23 @@ namespace UsageTray
         }
         public void UpdateData(Meter[] data, Color accent, string id)
         {
+            resetTip.Hide(this); resetTipText = null;
             Data = data; Accent = accent; ProviderId = id; UpdateTabs(); Invalidate();
         }
+        internal string ResetTooltipAt(Point point, DateTimeOffset now)
+        {
+            for (int i = 0; i < 2; i++)
+                if (new Rectangle(12, BarsTop - 3 + 34 * i, Width - 24, 28).Contains(point))
+                    return Data[i].Label + " · " + ResetInfo.Describe(Data[i].Remaining.HasValue ? Data[i].Reset : null, now);
+            return null;
+        }
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+            string text = ResetTooltipAt(e.Location, DateTimeOffset.UtcNow);
+            if (text != resetTipText) { resetTipText = text; resetTip.SetToolTip(this, text); }
+        }
+        protected override void OnMouseLeave(EventArgs e) { resetTip.Hide(this); resetTipText = null; base.OnMouseLeave(e); }
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if ((keyData == Keys.Left || keyData == Keys.Right) && providerIds.Length > 1)
@@ -137,7 +154,7 @@ namespace UsageTray
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            if (disposing) { bodyFont.Dispose(); valueFont.Dispose(); }
+            if (disposing) { resetTip.Dispose(); bodyFont.Dispose(); valueFont.Dispose(); }
         }
         public void Toggle(Meter[] data, Color accent, string id)
         {
@@ -282,6 +299,13 @@ namespace UsageTray
             {
                 menu.Items.Add(new ToolStripMenuItem(state.Provider.Name) { Enabled = false });
                 menu.Items.Add(new ToolStripMenuItem(state.Status) { Name = "status", Enabled = false });
+                var resets = new ToolStripMenuItem("Restablecimientos · hora peninsular");
+                for (int i = 0; i < 2; i++) resets.DropDownItems.Add(new ToolStripMenuItem { Enabled = false });
+                resets.DropDownOpening += delegate {
+                    var meters = state.Data.Visible(Monthly(state.Provider));
+                    for (int i = 0; i < 2; i++) resets.DropDownItems[i].Text = meters[i].Label + " · " + ResetInfo.Describe(meters[i].Remaining.HasValue ? meters[i].Reset : null, DateTimeOffset.UtcNow);
+                };
+                menu.Items.Add(resets);
                 menu.Items.Add("Actualizar (respeta la espera)", null, async delegate {
                     if (!state.Policy.CanFetch(DateTimeOffset.UtcNow)) { MessageBox.Show("La siguiente consulta estará disponible en " + Math.Max(1, Math.Ceiling((state.Policy.Next - DateTimeOffset.UtcNow).TotalSeconds)) + " s.", "QuotaDock"); return; }
                     await Refresh(state);
@@ -327,7 +351,7 @@ namespace UsageTray
                 thresholds.DropDownItems.Add(item);
             }
             menu.Items.Add(thresholds);
-            menu.Items.Add("Acerca de", null, delegate { MessageBox.Show("QuotaDock 1.2.0\nUn icono, dos barras y selector de proveedor. Sin telemetría.\nCredenciales manuales cifradas para tu usuario de Windows.\n\nLas cuotas proceden del proveedor, no de estimaciones. Los endpoints internos pueden cambiar.", "QuotaDock"); });
+            menu.Items.Add("Acerca de", null, delegate { MessageBox.Show("QuotaDock 1.3.0 · MIT\nUn icono, dos barras y selector de proveedor. Sin telemetría.\nPasa el ratón sobre una barra para consultar su reinicio.\n\nLas cuotas proceden del proveedor, no de estimaciones. Los endpoints internos pueden cambiar.", "QuotaDock"); });
             menu.Items.Add("Salir", null, delegate { ExitThread(); });
             menu.Opening += delegate {
                 if (state != null) menu.Items["status"].Text = state.Status;

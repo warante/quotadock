@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QuotaDock · vista previa para Piconera Tech</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 40px 20px; background: #f4eee6; color: #2c2a28; font: 16px/1.6 system-ui, sans-serif; }
+    main { max-width: 1000px; margin: auto; }
+    .eyebrow { color: #a66343; letter-spacing: .18em; text-transform: uppercase; font-size: 12px; }
+    h1 { font-size: clamp(28px, 5vw, 44px); line-height: 1.15; margin: 12px 0; }
+    .intro { max-width: 620px; color: #5c564f; }
+    .languages { display: flex; gap: 8px; margin: 24px 0; }
+    button { border: 1px solid #d9cfc3; border-radius: 24px; padding: 8px 18px; cursor: pointer; background: #fffaf4; color: #2c2a28; }
+    button[aria-pressed="true"] { background: #2c2a28; color: #fffaf4; }
+    .project { display: flex; flex-direction: column; width: min(100%, 370px); padding: 22px 21px; background: #fffaf4; border: 1px solid #d9cfc3; border-radius: 18px; text-decoration: none; color: inherit; overflow: hidden; }
+    .project:hover { box-shadow: 0 18px 40px #7a3e281f; }
+    .project-visual { position: relative; }
+    .project-banner { display: block; width: 100%; height: auto; }
+    .project-logo { position: absolute; left: 13px; bottom: 11px; width: 48px; height: 48px; background: #fffaf4; border: 2px solid #fffaf4; border-radius: 13px; }
+    .project-body { padding: 18px 19px 20px; }
+    h2 { margin: 0 0 8px; font-size: 20px; }
+    .description { margin: 0; color: #5c564f; font-size: 15px; }
+    .meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+    .tag { border: 1px solid #d9cfc3; border-radius: 24px; padding: 2px 8px; font-size: 11px; text-transform: uppercase; color: #5c564f; }
+    .tag-store { color: #7a3e28; border-color: #c49d84; }
+    .note { margin-top: 26px; color: #5c564f; font-size: 13px; }
+    a:focus-visible, button:focus-visible { outline: 3px solid #a66343; outline-offset: 4px; }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Piconera Tech · recurso de integración</p>
+    <h1>QuotaDock</h1>
+    <p class="intro">Vista previa local de la ficha. Reproduce las clases, proporciones y colores del porfolio sin modificar la web publicada.</p>
+    <div class="languages" role="group" aria-label="Idioma de la ficha">
+      <button type="button" data-language="es" aria-pressed="true">Español</button>
+      <button type="button" data-language="en" aria-pressed="false">English</button>
+    </div>
+    <a class="project" href="https://github.com/warante/quotadock" target="_blank" rel="noopener noreferrer" aria-label="QuotaDock en GitHub: código y descargas para Windows">
+      <div class="project-visual">
+        <img class="project-banner" src="assets/apps/banners/quotadock.png" width="1600" height="900" alt="">
+        <img class="project-logo" src="assets/apps/quotadock.svg" width="512" height="512" alt="Icono de QuotaDock">
+      </div>
+      <div class="project-body">
+        <h2>QuotaDock</h2>
+        <p class="description">Tus cuotas de IA junto al reloj. Un icono, dos barras y tus proveedores, sin ruido.</p>
+        <div class="meta"><span class="tag">Windows</span><span class="tag tag-store">GitHub</span><span class="tag license">Código abierto · MIT</span></div>
+      </div>
+    </a>
+    <p class="note">Imágenes y datos de demostración. La aplicación es para Windows y sus binarios actuales no están firmados. Esta página no se publica automáticamente.</p>
+  </main>
+  <script>
+    const translations = {
+      es: { description: 'Tus cuotas de IA junto al reloj. Un icono, dos barras y tus proveedores, sin ruido.', license: 'Código abierto · MIT', banner: 'quotadock.png', label: 'QuotaDock en GitHub: código y descargas para Windows', alt: 'Icono de QuotaDock' },
+      en: { description: 'Your AI quotas beside the clock. One icon, two bars and your providers, without the clutter.', license: 'Open source · MIT', banner: 'quotadock-en.png', label: 'QuotaDock on GitHub: source code and Windows downloads', alt: 'QuotaDock icon' }
+    };
+    document.querySelectorAll('[data-language]').forEach(button => button.addEventListener('click', () => {
+      const language = button.dataset.language;
+      const copy = translations[language];
+      document.querySelector('.project').lang = language;
+      document.querySelector('.project').setAttribute('aria-label', copy.label);
+      document.querySelector('.description').textContent = copy.description;
+      document.querySelector('.license').textContent = copy.license;
+      document.querySelector('.project-banner').src = 'assets/apps/banners/' + copy.banner;
+      document.querySelector('.project-logo').alt = copy.alt;
+      document.querySelectorAll('[data-language]').forEach(item => item.setAttribute('aria-pressed', String(item === button)));
+    }));
+  </script>
+</body>
+</html>

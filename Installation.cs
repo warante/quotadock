@@ -40,7 +40,7 @@ namespace UsageTray
         {
             string target = Path.Combine(root, "QuotaDock.exe");
             string uninstall = Path.Combine(root, "Uninstall.ps1");
-            string[] files = { target, uninstall, Path.Combine(programs, "QuotaDock.lnk"), Path.Combine(programs, "Desinstalar QuotaDock.lnk") };
+            string[] files = { target, uninstall, Path.Combine(programs, "QuotaDock.lnk"), Path.Combine(programs, "Desinstalar QuotaDock.lnk"), Path.Combine(root, "LICENSE"), Path.Combine(root, "PRIVACY.md") };
             var previous = new Dictionary<string, byte[]>();
             foreach (string path in files) previous[path] = platform.Read(path);
             string oldStartup = platform.Startup;
@@ -49,8 +49,10 @@ namespace UsageTray
             {
                 // Load all resources before changing the machine.
                 byte[] app = resource("QuotaDock.exe"); byte[] script = resource("Uninstall.ps1");
-                if (app == null || script == null) throw new InvalidOperationException("Faltan recursos del instalador.");
+                byte[] license = resource("LICENSE"); byte[] privacy = resource("PRIVACY.md");
+                if (app == null || script == null || license == null || privacy == null) throw new InvalidOperationException("Faltan recursos del instalador.");
                 platform.Write(target, app); platform.Write(uninstall, script);
+                platform.Write(files[4], license); platform.Write(files[5], privacy);
                 platform.Shortcut(files[2], target, "");
                 string arguments = "-NoProfile -ExecutionPolicy Bypass -File \"" + uninstall + "\"";
                 platform.Shortcut(files[3], powershell, arguments);
@@ -58,7 +60,7 @@ namespace UsageTray
                 if (startup) platform.Startup = command;
                 else if (platform.Startup == command) platform.Startup = null;
                 platform.Registration = new Dictionary<string, object> {
-                    { "DisplayName", "QuotaDock" }, { "DisplayVersion", "1.2.0" }, { "Publisher", "QuotaDock" },
+                    { "DisplayName", "QuotaDock" }, { "DisplayVersion", "1.3.0" }, { "Publisher", "QuotaDock" },
                     { "InstallLocation", root }, { "DisplayIcon", target },
                     { "UninstallString", "\"" + powershell + "\" " + arguments }, { "NoModify", 1 }, { "NoRepair", 1 }
                 };

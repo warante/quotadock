@@ -23,6 +23,10 @@ try {
         if ($command -eq ('"' + $target + '"')) { Remove-ItemProperty -Path $run -Name 'QuotaDock' }
     }
     if (Test-Path -LiteralPath $target) { Remove-Item -LiteralPath $target }
+    foreach ($name in @('LICENSE', 'PRIVACY.md')) {
+        $document = Join-Path $PSScriptRoot $name
+        if (Test-Path -LiteralPath $document) { Remove-Item -LiteralPath $document }
+    }
     $programs = if ($testing) { Join-Path $PSScriptRoot 'Programs' } else { Join-Path ([Environment]::GetFolderPath('Programs')) 'QuotaDock' }
     foreach ($name in @('QuotaDock.lnk', 'Desinstalar QuotaDock.lnk')) {
         $link = Join-Path $programs $name

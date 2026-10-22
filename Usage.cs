@@ -43,8 +43,9 @@ namespace UsageTray
 
     public static class Usage
     {
-        public static Snapshot Parse(string kind, string text)
+        public static Snapshot Parse(string kind, string text, DateTimeOffset? receivedAt = null)
         {
+            var observed = receivedAt ?? DateTimeOffset.UtcNow;
             object root = Json.Parse(text);
             if (!(root is Dictionary<string, object>) || Json.Get(root, "error") != null) throw new QuotaException("schema", "El proveedor devolvió un error o un formato no reconocido.");
             var result = new Snapshot();
@@ -58,14 +59,15 @@ namespace UsageTray
                     var duration = Json.Number(Json.Get(win, "limit_window_seconds"));
                     string id = duration == 18000 ? "session" : duration == 604800 ? "weekly" :
                         !duration.HasValue ? (i == 0 ? "session" : "weekly") : null;
-                    if (id != null && win != null) result.Add(id, id == "session" ? "5 h" : "Semana", Json.Percent(Json.Get(win, "used_percent"), true));
+                    var reset = Json.Get(win, "reset_at") != null ? ResetInfo.Unix(Json.Get(win, "reset_at"), false) : ResetInfo.After(Json.Get(win, "reset_after_seconds"), observed);
+                    if (id != null && win != null) result.Add(id, id == "session" ? "5 h" : "Semana", Json.Percent(Json.Get(win, "used_percent"), true), reset);
                 }
                 result.Meters.Sort((a, b) => (a.Id == "session" ? 0 : 1).CompareTo(b.Id == "session" ? 0 : 1));
             }
             else if (kind == "claude")
             {
-                result.Add("session", "5 h", Json.Percent(Json.Get(Json.Get(root, "five_hour"), "utilization"), true));
-                result.Add("weekly", "Semana", Json.Percent(Json.Get(Json.Get(root, "seven_day"), "utilization"), true));
+                result.Add("session", "5 h", Json.Percent(Json.Get(Json.Get(root, "five_hour"), "utilization"), true), ResetInfo.Iso(Json.Get(Json.Get(root, "five_hour"), "resets_at")));
+                result.Add("weekly", "Semana", Json.Percent(Json.Get(Json.Get(root, "seven_day"), "utilization"), true), ResetInfo.Iso(Json.Get(Json.Get(root, "seven_day"), "resets_at")));
             }
             else if (kind == "go")
             {
@@ -77,7 +79,7 @@ namespace UsageTray
                     var status = Json.Text(Json.Get(bucket, "status"));
                     var percent = Json.Number(Json.Get(bucket, "percent"));
                     if ((status != "ok" && status != "rate-limited") || !percent.HasValue || percent < 0 || percent > 100) throw Schema();
-                    result.Add(key == "rolling" ? "session" : key, key == "rolling" ? "5 h" : key == "weekly" ? "Semana" : "Mes", 100 - percent);
+                    result.Add(key == "rolling" ? "session" : key, key == "rolling" ? "5 h" : key == "weekly" ? "Semana" : "Mes", 100 - percent, ResetInfo.Iso(Json.Get(bucket, "resetsAt")));
                 }
             }
             else if (kind == "kimi")
@@ -88,15 +90,15 @@ namespace UsageTray
                     string unit = Json.Text(Json.Get(window, "timeUnit") ?? Json.Get(window, "time_unit")).Replace("TIME_UNIT_", "");
                     var duration = Json.Number(Json.Get(window, "duration"));
                     if ((duration == 300 && (unit == "MINUTE" || unit == "MINUTES")) || (duration == 5 && (unit == "HOUR" || unit == "HOURS")))
-                    { result.Add("session", "5 h", Counter(Json.Get(limit, "detail"))); break; }
+                    { result.Add("session", "5 h", Counter(Json.Get(limit, "detail")), ResetInfo.Kimi(Json.Get(limit, "detail"))); break; }
                 }
                 if (!result.Meters.Any()) result.Add("session", "5 h", null);
                 var weekly = Json.Get(root, "usage");
-                if (weekly != null) result.Add("weekly", "Semana", Counter(weekly));
+                if (weekly != null) result.Add("weekly", "Semana", Counter(weekly), ResetInfo.Kimi(weekly));
                 else
                 {
                     var ratio = Json.Number(Json.Get(Json.Get(Json.Get(root, "usages"), "limit_month_total"), "used_ratio"));
-                    if (ratio.HasValue && ratio >= 0 && ratio <= 1) result.Add("monthly", "Mes", 100 * (1 - ratio));
+                    if (ratio.HasValue && ratio >= 0 && ratio <= 1) result.Add("monthly", "Mes", 100 * (1 - ratio), ResetInfo.Kimi(Json.Get(Json.Get(root, "usages"), "limit_month_total")));
                 }
             }
             else if (kind == "minimax")
@@ -109,8 +111,8 @@ namespace UsageTray
                 var start = Json.Number(Json.Get(row, "start_time"));
                 var end = Json.Number(Json.Get(row, "end_time"));
                 string label = start.HasValue && end.HasValue && end > start && end - start != 18000000 ? "Intervalo" : "5 h";
-                result.Add("session", label, Json.Percent(Json.Get(row, "current_interval_remaining_percent"), false));
-                result.Add("weekly", "Semana", Json.Percent(Json.Get(row, "current_weekly_remaining_percent"), false));
+                result.Add("session", label, Json.Percent(Json.Get(row, "current_interval_remaining_percent"), false), ResetInfo.Unix(Json.Get(row, "end_time"), true));
+                result.Add("weekly", "Semana", Json.Percent(Json.Get(row, "current_weekly_remaining_percent"), false), ResetInfo.Unix(Json.Get(row, "weekly_end_time"), true));
             }
             else if (kind == "zai")
             {
@@ -127,25 +129,29 @@ namespace UsageTray
                         return id == "session" ? unit == 3 && (!number.HasValue || number == 5) : id == "weekly" ? unit == 6 && (!number.HasValue || number == 1) : unit == 5 && number == 1;
                     }).ToArray();
                     if (matches.Length > 1) throw Schema();
-                    if (matches.Length == 1) result.Add(id, id == "session" ? "5 h" : id == "weekly" ? "Semana" : "Mes", Json.Percent(Json.Get(matches[0], "percentage"), true));
+                    if (matches.Length == 1) result.Add(id, id == "session" ? "5 h" : id == "weekly" ? "Semana" : "Mes", Json.Percent(Json.Get(matches[0], "percentage"), true), ResetInfo.Unix(Json.Get(matches[0], "nextResetTime"), true));
                 }
             }
             else if (kind == "copilot")
             {
                 var quotas = Json.Get(root, "quota_snapshots");
-                result.Add("premium", "Premium/mes", CopilotQuota(Json.Get(quotas, "premium_interactions")));
-                result.Add("chat", "Chat/mes", CopilotQuota(Json.Get(quotas, "chat")));
+                var reset = ResetInfo.Iso(Json.Get(root, "quota_reset_date_utc") ?? Json.Get(root, "quota_reset_date"));
+                result.Add("premium", "Premium/mes", CopilotQuota(Json.Get(quotas, "premium_interactions")), reset);
+                result.Add("chat", "Chat/mes", CopilotQuota(Json.Get(quotas, "chat")), reset);
             }
             else if (kind == "gemini")
             {
                 foreach (string family in new[] { "pro", "flash" })
                 {
-                    var values = Json.Items(Json.Get(root, "buckets")).Where(b =>
+                    var buckets = Json.Items(Json.Get(root, "buckets")).Where(b =>
                     {
                         var model = Json.Text(Json.Get(b, "modelId")).ToLowerInvariant();
                         return model.Contains(family) && !model.Contains("lite");
-                    }).Select(b => Json.Number(Json.Get(b, "remainingFraction"))).Where(n => n.HasValue && n >= 0 && n <= 1).ToArray();
-                    result.Add(family, family == "pro" ? "Pro" : "Flash", values.Any() ? 100 * values.Min() : null);
+                    }).Where(b => { var n = Json.Number(Json.Get(b, "remainingFraction")); return n.HasValue && n >= 0 && n <= 1; }).ToArray();
+                    var minimum = buckets.Any() ? buckets.Min(b => Json.Number(Json.Get(b, "remainingFraction"))) : null;
+                    var resets = buckets.Where(b => Json.Number(Json.Get(b, "remainingFraction")) == minimum).Select(b => ResetInfo.Iso(Json.Get(b, "resetTime"))).ToArray();
+                    ResetInfo reset = resets.Length > 0 && resets.All(r => r != null && r.At.HasValue && r.At == resets[0].At) ? resets[0] : null;
+                    result.Add(family, family == "pro" ? "Pro" : "Flash", 100 * minimum, reset);
                 }
             }
             if (!result.Meters.Any(m => m.Remaining.HasValue)) throw Schema();
@@ -194,7 +200,7 @@ namespace UsageTray
             using (var request = new HttpRequestMessage(body == null ? HttpMethod.Get : HttpMethod.Post, endpoint))
             {
                 request.Headers.TryAddWithoutValidation("Authorization", provider.Kind == "zai" ? auth.Token : (provider.Kind == "copilot" ? "token " : "Bearer ") + auth.Token);
-                request.Headers.UserAgent.ParseAdd("QuotaDock/1.2.0");
+                request.Headers.UserAgent.ParseAdd("QuotaDock/1.3.0");
                 request.Headers.Accept.ParseAdd("application/json");
                 if (provider.Kind == "claude") request.Headers.Add("anthropic-beta", "oauth-2025-04-20");
                 if (provider.Kind == "codex" && !string.IsNullOrWhiteSpace(auth.Account)) request.Headers.Add("ChatGPT-Account-Id", auth.Account);
