@@ -2,127 +2,131 @@
 
 **Tus límites de IA, de un vistazo.**
 
-Un monitor mínimo para Windows: dos barras junto al reloj que muestran cuánto queda de tu suscripción, sin abrir un panel ni interrumpir tu trabajo.
+Un único ejecutable para Windows, con dos barras junto al reloj por proveedor. Sin panel permanente, sin telemetría y sin contar tokens para inventar cuotas.
 
-**v1.0.0 · Windows 10/11 · Portable o instalable · Sin administrador**
+**1.1.0 · Windows 10/11 · Portable o instalable · Sin administrador**
+
+## Novedades
+
+- **Una aplicación:** activa los proveedores desde el menú de cualquiera de sus iconos. Puedes dejar solo uno o varios.
+- **Inicio con Windows:** configurable desde el menú, también en modo portable.
+- **Actualización fiable:** espera por proveedor, `Retry-After` en 429/503 y reintentos progresivos. «Actualizar» no se salta la espera.
+- **Identificación:** banda de color por proveedor y nombre en el tooltip y el menú.
+- **Avisos opcionales:** umbral de 5%, 10%, 20% o 25%, desactivados por defecto; no repiten el aviso mientras la cuota siga baja.
+- **Más proveedores:** OpenCode Go, Kimi, MiniMax, Z.AI/Zhipu, Copilot y Gemini CLI, además de Codex y Claude.
+
+## Descargar
+
+En **Releases → v1.1.0** del repositorio privado:
+
+| Artefacto | Uso |
+| --- | --- |
+| `QuotaDock-1.1.0-Setup.exe` | Instalar para tu usuario con inicio automático opcional. |
+| `QuotaDock-1.1.0-Windows-Portable.zip` | Descomprimir y abrir `QuotaDock.exe`. |
+| `QuotaDock.exe` | Ejecutable portable individual, sin dependencias externas. |
+| `SHA256SUMS.txt` | Huellas SHA-256 del instalador, ZIP y aplicación. |
+
+Para descargar necesitas acceso al repositorio privado. Los binarios **siguen sin firma** hasta disponer de un certificado de firma de código válido. La compilación admite firma Authenticode con timestamp y puede exigirla; no se presenta un certificado autofirmado como una firma de confianza. En un equipo administrado, solicita aprobación si Windows bloquea la ejecución.
+
+El instalador usa `%LOCALAPPDATA%\QuotaDock`, crea un acceso en Inicio y registra la desinstalación por usuario. **Abrir QuotaDock al finalizar** está activado por defecto. Si Windows impide abrirlo, se informa de que está instalado pero bloqueado: eso no se confunde con un fallo de instalación. No descarga paquetes, no instala servicios y no necesita administrador. Si falla la instalación, intenta restaurar sus archivos y configuración anteriores. Cierra QuotaDock antes de actualizar.
+
+## Primer uso
+
+1. Abre `QuotaDock.exe`. Se activa OpenAI/Codex por defecto.
+2. Clic derecho → **Proveedores** para activar los que utilices. Si desactivas todos, queda un icono de control para poder reactivarlos.
+3. Configura la sesión o clave de cada proveedor como se indica abajo.
+4. Si el icono está oculto en **^**, arrástralo junto al reloj.
+
+Un clic abre únicamente las dos líneas con sus barras, etiquetas y porcentajes **restantes**. Los colores verde/amarillo/rojo indican más del 25%, hasta el 25% y hasta el 10%. Gris y `—%` significan dato no disponible, no cuota agotada.
 
 ## Proveedores
 
-| Proveedor | Aplicación | Límites mostrados | Sesión necesaria |
-| --- | --- | --- | --- |
-| OpenAI | `QuotaDock.OpenAI.exe` | Codex: 5 horas y semana | Codex con tu cuenta de ChatGPT |
-| Anthropic | `QuotaDock.Claude.exe` | Claude: 5 horas y semana global | Claude Code con tu suscripción de Claude |
+| Proveedor | Cómo conectar | Barras |
+| --- | --- | --- |
+| OpenAI / Codex | `codex login` con ChatGPT; lee la sesión local | 5 h / semana de Codex |
+| Claude | Claude Code → `/login`; lee la sesión local | 5 h / semana global |
+| OpenCode Go / Go Plus | **Configurar credencial**, `OPENCODE_GO_API_KEY` o `OPENCODE_API_KEY` | 5 h / semana; mes seleccionable |
+| Kimi Code global / China | Clave de Kimi Code; `KIMI_API_KEY` / `KIMI_CN_API_KEY` | 5 h / semana o mes según la respuesta |
+| MiniMax global / China | Subscription Key; `MINIMAX_API_KEY` / `MINIMAX_CN_API_KEY` | Intervalo / semana del pool de texto |
+| Z.AI / Zhipu | Clave del Coding Plan; `ZAI_API_KEY` / `ZHIPU_API_KEY` | 5 h / semana o mes según el proveedor |
+| GitHub Copilot | Token OAuth; `GITHUB_COPILOT_TOKEN` o `gh auth token` del CLI oficial | Premium/mes / Chat/mes |
+| Gemini CLI | Sesión Google de Gemini CLI; opcional `GEMINI_ACCESS_TOKEN` | Pro / Flash, no 5 h / semana |
 
-QuotaDock está enfocado en los proveedores de IA más populares. **Esta versión solo soporta los dos de la tabla**: no anuncia integración con Gemini, Copilot u otros sin una implementación y verificación previas.
+Los conectores nuevos se han probado con datos sintéticos: **no se garantiza acceso con todos los tipos de cuenta** y varios endpoints son internos/experimentales. Consulta [PROVIDERS.md](PROVIDERS.md) para fuentes, regiones, límites y proveedores estudiados pero todavía no compatibles (DeepSeek, Qwen/Alibaba, MiMo, Cursor, Grok y otros).
 
-## Descargar e instalar
+La región se selecciona explícitamente: **nunca se prueba tu clave en otra región ni en otro proveedor**. Una clave de API de pago por uso no equivale a una clave de suscripción.
 
-En la sección **Releases → v1.0.0** del repositorio encontrarás:
+### Sesiones oficiales
 
-| Archivo | Uso |
-| --- | --- |
-| `QuotaDock-1.0.0-Setup.exe` | Instalador por usuario: selecciona proveedores e inicio automático opcional. |
-| `QuotaDock-1.0.0-Windows-Portable.zip` | Descomprime y abre el ejecutable del proveedor que quieras. |
-| `QuotaDock.OpenAI.exe` / `QuotaDock.Claude.exe` | Ejecutables portables individuales, sin archivos adicionales. |
-| `SHA256SUMS.txt` | Huellas SHA-256 de los cuatro artefactos. |
+- Codex: `%CODEX_HOME%\auth.json`, o `%USERPROFILE%\.codex\auth.json`, con alternativa `.config\codex\auth.json`.
+- Claude: `%CLAUDE_CONFIG_DIR%\.credentials.json`, o `%USERPROFILE%\.claude\.credentials.json`.
+- Gemini CLI: `%USERPROFILE%\.gemini\oauth_creds.json`; se consulta el proyecto con Google si no defines `GOOGLE_CLOUD_PROJECT`.
+- Copilot: solo al activarlo y si no has proporcionado credencial, se invoca `auth token --hostname github.com` del GitHub CLI instalado en la ubicación oficial de Program Files. No se consulta tu navegador ni se imprime el token. El OAuth de GitHub CLI puede carecer de permisos de Copilot.
 
-El repositorio y sus descargas son privados: debes iniciar sesión en GitHub con una cuenta autorizada.
+Las sesiones se releen en cada consulta, sin renovar ni modificar sus tokens. Si caducan, inicia sesión en el cliente oficial. No se leen el Administrador de credenciales ni la base de datos de OpenCode V2. Para Go utiliza la clave de tu suscripción, guardada aquí de forma cifrada o mediante variable de entorno.
 
-El instalador usa `%LOCALAPPDATA%\QuotaDock`, crea accesos en Inicio y permite desinstalar desde **Configuración → Aplicaciones** o **Inicio → QuotaDock → Desinstalar**. No instala servicios, no necesita elevación y no descarga dependencias. Abre la aplicación desde Inicio tras instalarla.
+### Claves manuales
 
-**Los ejecutables no están firmados.** SmartScreen o las políticas de tu organización pueden advertir o bloquear su ejecución. En equipos administrados, solicita aprobación al administrador; no se debe desactivar la protección para ejecutarlos.
+**Configurar credencial** permite guardar una clave o token para los proveedores que lo admiten. Se cifra con **Windows DPAPI, para el usuario actual**, en `%APPDATA%\QuotaDock\credentials`. No es portable entre cuentas ni máquinas. La entrada está enmascarada, no se vuelve a mostrar el secreto y no se copia al proyecto ni al ZIP. Elige **Olvidar clave** para eliminarlo. Las variables de entorno tienen prioridad.
 
-## Conectar tu cuenta
+Los ajustes no secretos se guardan en `%APPDATA%\QuotaDock\settings.json`, y la próxima consulta permitida en `cooldowns.json`, para no perder la espera al reiniciar. No se guarda el historial de uso ni la respuesta completa del proveedor.
 
-### OpenAI / Codex
+## Frecuencia, errores y avisos
 
-Inicia sesión en Codex con tu cuenta de ChatGPT:
+- Codex se consulta cada **60 segundos**; el resto cada **5 minutos**, para reducir bloqueos de los endpoints de cuotas.
+- No es streaming. Los datos pueden tener además retraso en el proveedor.
+- 401: sesión o clave rechazada. 403: permisos, región, plan o bloqueo; no se asume siempre que el token haya caducado.
+- 429/503: respeta `Retry-After` y aplica espera progresiva; el clic manual, desactivar/reactivar un proveedor y reiniciar no eliminan esa espera si se puede guardar y recuperar `cooldowns.json`.
+- Los errores limpian las barras: no se muestran datos antiguos como actuales. El menú contiene el estado de conexión, sin respuestas privadas del servidor.
+- Los avisos están apagados por defecto. Se envía uno al cruzar el umbral por ejecución; se rearma después de recuperar más de dos puntos porcentuales sobre él. Windows puede silenciarlos con No molestar.
+- La opción **Priorizar mes en la segunda barra** muestra el cupo mensual cuando exista; no cambia una cuota mensual por una semanal ficticia. No se indican reinicios calculados localmente.
 
-```text
-codex login
-```
+## Inicio automático y migración
 
-Se lee `%CODEX_HOME%\auth.json`, si defines esa variable; en caso contrario, `%USERPROFILE%\.codex\auth.json`, con alternativa en `.config\codex\auth.json`.
+Activa **Iniciar con Windows** desde el menú o el instalador. Se usa únicamente `HKCU\…\Run\QuotaDock`. En modo portable apunta a la ruta actual: si mueves el ejecutable, desactiva y reactiva la opción desde su nueva ubicación.
 
-Muestra **los límites de Codex**, no el saldo de la API ni el uso general de todos los modelos de ChatGPT.
+La versión 1.1.0 no modifica ni borra los ejecutables de 1.0.0 ni sus accesos de inicio. **Para migrar:** sal de los iconos antiguos, retira sus accesos de `shell:startup` y utiliza solo `QuotaDock.exe`. No ejecutes ambas versiones si no quieres duplicar iconos y consultas. La configuración de proveedores se hace ahora desde el menú único.
 
-### Claude
+## Desinstalar
 
-Abre Claude Code con `claude` y ejecuta `/login` con tu suscripción de Claude. Se lee `%CLAUDE_CONFIG_DIR%\.credentials.json`, si defines esa variable; en caso contrario, `%USERPROFILE%\.claude\.credentials.json`.
+**Configuración → Aplicaciones → QuotaDock**, o el acceso **Desinstalar QuotaDock** de Inicio. Solo se detiene el ejecutable instalado y se eliminan sus archivos conocidos, accesos y registro propios. No se borran archivos ajenos ni sesiones de clientes oficiales. Los ajustes y claves cifradas se conservan; utiliza **Olvidar clave** antes de desinstalar si quieres retirarlas.
 
-La barra semanal es el límite global, no las cuotas específicas de Opus/Sonnet ni el crédito de uso extra. Iniciar sesión solo en la web de Claude no crea las credenciales locales necesarias.
+En modo portable, desactiva primero el inicio automático, sal y borra el ejecutable.
 
-### Condiciones comunes
+## Seguridad y privacidad
 
-- Se necesita que el cliente oficial esté instalado y haya guardado la sesión **en archivo**; no se consulta el Administrador de credenciales de Windows.
-- Las claves API no sirven para consultar estos porcentajes de suscripción.
-- Si la sesión caduca, vuelve a iniciar sesión en el cliente correspondiente. QuotaDock relee las credenciales en cada consulta, sin renovarlas ni modificarlas.
+- Solo HTTPS a destinos fijos. No se siguen redirecciones con credenciales.
+- No hay telemetría, servidor propio, cookies de navegador, inferencia ni consumo de tokens para consultar cuotas.
+- Tokens solo en memoria durante la consulta; las claves manuales solo se persisten cifradas para el usuario de Windows.
+- Respuestas limitadas a 1 MiB y consultas con timeout. No se muestran respuestas crudas ni mensajes privados del proveedor.
+- Las pruebas y los artefactos no incluyen cuentas reales. El commit usa identidad `noreply`.
+- Las APIs internas pueden cambiar. QuotaDock no está afiliado a los proveedores ni garantiza disponibilidad de sus endpoints.
 
-## Dos barras. Nada más.
+## Compilar, verificar y firmar
 
-- **Arriba:** porcentaje restante de 5 horas.
-- **Abajo:** porcentaje restante semanal.
-- **Un clic:** las mismas dos líneas, con etiquetas y porcentajes.
-- **Al pasar el ratón:** los dos porcentajes restantes.
-- **Clic derecho:** estado de conexión, actualizar, ayuda y salir.
-
-Verde: más de 25%; amarillo: hasta 25%; rojo: hasta 10%. Gris y `—%`: dato no disponible. Una cuenta sin alguno de los límites no muestra un porcentaje inventado.
-
-Las consultas se hacen cada **60 segundos**, no en streaming. Los errores borran los valores visibles para no presentar información antigua como actual y espacian los reintentos hasta 10 minutos. Los proveedores pueden limitar las consultas o retrasar sus datos.
-
-Si Windows oculta el icono en **^**, arrástralo junto al reloj. Puedes abrir ambos proveedores a la vez; cada uno tiene su propio icono. No se permite duplicar instancias de un mismo proveedor en la sesión de Windows.
-
-## Inicio automático y versiones anteriores
-
-En el instalador puedes activar el inicio automático de los proveedores seleccionados. Para una versión portable, pulsa `Win + R`, escribe `shell:startup` y coloca allí un acceso directo al ejecutable. No lo muevas después sin actualizar ese acceso.
-
-Los antiguos `CodexUsageTray.exe` y `ClaudeUsageTray.exe` y sus accesos de inicio **no se modifican**. QuotaDock comparte su bloqueo de instancia para evitar iconos duplicados. Si migras a la instalación nueva, sal de la versión anterior y retira manualmente su acceso de inicio para que no arranque la copia antigua primero.
-
-## Privacidad y limitaciones
-
-- No hay telemetría, servidor propio, historial ni copia de tokens en disco.
-- Las credenciales se leen localmente y solo se envían al proveedor correspondiente mediante HTTPS.
-- OpenAI: `https://chatgpt.com/backend-api/wham/usage`.
-- Anthropic: `https://api.anthropic.com/api/oauth/usage`.
-- Son **endpoints internos, no APIs públicas estables**: pueden cambiar o dejar de funcionar. La disponibilidad depende de tu cuenta, sus permisos y la política del proveedor.
-- QuotaDock no está afiliado a OpenAI ni a Anthropic. Las marcas pertenecen a sus propietarios.
-
-## Compilar y probar
-
-Requisitos: Windows y .NET Framework 4.x, normalmente incluido en Windows 10/11. No necesita Python, Node, SDK de .NET moderno ni paquetes NuGet.
+Requisitos: Windows 10/11 y .NET Framework 4.x; sin Python, Node, NuGet ni SDK moderno de .NET.
 
 ```powershell
-# Compilar ambos proveedores en dist\v1.0.0 (sin tocar los ejecutables antiguos)
-.\build.ps1
-
-# Compilar solo uno
-.\build.ps1 -Provider Claude
-.\build.ps1 -Provider Codex
-
-# Pruebas unitarias: no leen credenciales ni consultan proveedores
-.\test.ps1
-
-# Opcional: pruebas reales de ambos proveedores con tus sesiones locales
-.\test.ps1 -Live
-
-# Generar ejecutables, instalador, ZIP y SHA-256
-.\release.ps1
+.\build.ps1          # dist\v1.1.0\QuotaDock.exe
+.\test.ps1           # pruebas sintéticas, HTTP simulado, DPAPI e instalación aislada
+.\release.ps1        # aplicación, instalador, ZIP y SHA-256
+.\package-test.ps1   # recursos del instalador y desinstalación en sandbox
+.\privacy-check.ps1  # fuentes y artefactos, sin imprimir coincidencias sensibles
+.\verify.ps1         # todas las comprobaciones anteriores
 ```
 
-Si PowerShell bloquea scripts por su política de ejecución, utiliza los mecanismos aprobados de tu equipo. La política de ejecución de scripts no es lo mismo que el control de aplicaciones: una compilación correcta no garantiza que un equipo permita ejecutar binarios sin firmar.
+Firma opcional con un certificado **de confianza** de firma de código en `Cert:\CurrentUser\My`, con clave privada. Configura `QUOTADOCK_SIGNING_THUMBPRINT` y ejecuta:
 
-### Estructura
+```powershell
+.\release.ps1 -RequireSigned
+```
 
-- `UsageTray.cs`: interfaz común, lectura de credenciales y porcentajes.
-- `Provider.cs`: selección de proveedor mediante compilación condicional.
-- `Tests.cs` / `test.ps1`: pruebas de formatos, límites ausentes y valores inválidos.
-- `Installer.cs` / `Uninstall.ps1`: instalación y desinstalación por usuario.
-- `AssemblyInfo.cs`: metadatos de versión 1.0.0.
-- `ci/windows.yml`: plantilla de GitHub Actions para pruebas y artefactos de Windows, sin secretos de cuentas. No está activada; para usarla, cópiala a `.github/workflows/windows.yml` y súbela con autorización `workflow` de GitHub.
-- `privacy-check.ps1`: comprobación preventiva de secretos, correos y rutas personales en fuentes y artefactos.
+Se firma primero la aplicación, después se incrusta en el instalador, se firma el instalador y se generan los hashes. Sin certificado, `-RequireSigned` falla: no se publica una firma falsa. La adquisición y custodia del certificado quedan a cargo del propietario del proyecto.
 
-Para añadir un proveedor se necesita una fuente real de cuotas, autenticación local segura y pruebas con datos sintéticos. No debe deducirse el saldo a partir de tokens contados localmente ni enviarse la sesión a terceros.
+`ci/windows.yml` contiene la plantilla de pruebas y artefactos de GitHub Actions. **No está activada**, porque no se completó la autorización `workflow`. Para activarla, copia la plantilla a `.github/workflows/windows.yml` y súbela con ese permiso. No se incluyen claves de proveedores en CI. Como alternativa local, `.githooks/pre-push` ejecuta la verificación antes de una subida cuando configuras `git config core.hooksPath .githooks`.
+
+Si la política de tu equipo bloquea scripts o ejecutables sin firmar, utiliza mecanismos aprobados por tu administrador; no desactives el control de aplicaciones.
 
 ## Historial
 
-Consulta [CHANGELOG.md](CHANGELOG.md).
+[CHANGELOG.md](CHANGELOG.md) · [Fuentes y estado de proveedores](PROVIDERS.md)

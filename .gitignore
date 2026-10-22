@@ -7,3 +7,9 @@ auth.json
 .credentials.json
 .env
 .env.*
+**/credentials/
+settings.json
+cooldowns.json
+*.pfx
+*.p12
+*.key
