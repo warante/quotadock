@@ -1,0 +1,9 @@
+/dist/
+/.vs/
+*.user
+*.pdb
+*.log
+auth.json
+.credentials.json
+.env
+.env.*
