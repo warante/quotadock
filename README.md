@@ -2,27 +2,48 @@
 
 **Tus límites de IA, de un vistazo.**
 
-Un único ejecutable para Windows, con dos barras junto al reloj por proveedor. Sin panel permanente, sin telemetría y sin contar tokens para inventar cuotas.
+**Un icono. Dos barras. El proveedor que tú elijas.**
 
-**1.1.0 · Windows 10/11 · Portable o instalable · Sin administrador**
+Tus cuotas de IA junto al reloj, sin llenar la bandeja de iconos. Pulsa para cambiar de proveedor; los demás siguen actualizándose en segundo plano.
+
+**1.2.0 · Windows 10/11 · Portable o instalable · Sin administrador**
+
+<p align="center">
+  <img src="docs/images/quotadock-preview.png" alt="QuotaDock con un único icono junto al reloj y pestañas para cambiar entre OpenAI, Claude y Kimi" width="880">
+</p>
+
+> Vista previa de la interfaz real, compuesta con datos de demostración. No contiene cuentas ni cuotas personales.
+
+## Un solo icono, todos tus proveedores
+
+<p align="center">
+  <img src="docs/images/provider-selector.png" alt="Selector de proveedores de QuotaDock: pestañas y dos barras del proveedor seleccionado" width="580">
+</p>
+
+1. **Pulsa el icono** para abrir las dos barras y las pestañas.
+2. **Elige un proveedor:** cambian el color del icono y sus dos porcentajes, sin otra consulta.
+3. **Cierra el panel:** la bandeja conserva únicamente las barras del proveedor elegido. La selección se recuerda al volver a abrir QuotaDock.
+
+También puedes cambiar desde **clic derecho → Proveedor visible**. Las flechas izquierda y derecha recorren las pestañas. Los proveedores con errores muestran `—%`, sin sustituirse por otro silenciosamente.
 
 ## Novedades
 
-- **Una aplicación:** activa los proveedores desde el menú de cualquiera de sus iconos. Puedes dejar solo uno o varios.
+- **Un solo icono:** activa varios proveedores, elige cuál ver y cambia desde las pestañas del panel.
 - **Inicio con Windows:** configurable desde el menú, también en modo portable.
 - **Actualización fiable:** espera por proveedor, `Retry-After` en 429/503 y reintentos progresivos. «Actualizar» no se salta la espera.
 - **Identificación:** banda de color por proveedor y nombre en el tooltip y el menú.
+- **Diseño moderno y ligero:** panel redondeado, pestañas con estados de foco y hover, tipografía Segoe UI, barras suaves y menú oscuro. Dibujo nativo con GDI+, sin navegador integrado, librerías externas ni bucles de animación. Respeta el alto contraste de Windows.
 - **Avisos opcionales:** umbral de 5%, 10%, 20% o 25%, desactivados por defecto; no repiten el aviso mientras la cuota siga baja.
 - **Más proveedores:** OpenCode Go, Kimi, MiniMax, Z.AI/Zhipu, Copilot y Gemini CLI, además de Codex y Claude.
 
 ## Descargar
 
-En **Releases → v1.1.0** del repositorio privado:
+En **Releases → v1.2.0** encontrarás los siguientes artefactos. También se generan en `dist\v1.2.0` al compilar:
 
 | Artefacto | Uso |
 | --- | --- |
-| `QuotaDock-1.1.0-Setup.exe` | Instalar para tu usuario con inicio automático opcional. |
-| `QuotaDock-1.1.0-Windows-Portable.zip` | Descomprimir y abrir `QuotaDock.exe`. |
+| `QuotaDock-1.2.0-Setup.exe` | Instalar para tu usuario con inicio automático opcional. |
+| `QuotaDock-1.2.0-Windows-Portable.zip` | Descomprimir y abrir `QuotaDock.exe`. |
 | `QuotaDock.exe` | Ejecutable portable individual, sin dependencias externas. |
 | `SHA256SUMS.txt` | Huellas SHA-256 del instalador, ZIP y aplicación. |
 
@@ -33,11 +54,11 @@ El instalador usa `%LOCALAPPDATA%\QuotaDock`, crea un acceso en Inicio y registr
 ## Primer uso
 
 1. Abre `QuotaDock.exe`. Se activa OpenAI/Codex por defecto.
-2. Clic derecho → **Proveedores** para activar los que utilices. Si desactivas todos, queda un icono de control para poder reactivarlos.
+2. Clic derecho → **Proveedores** para activar los que utilices. Todos comparten un único icono. Si desactivas todos, ese mismo icono abre el menú para reactivarlos.
 3. Configura la sesión o clave de cada proveedor como se indica abajo.
 4. Si el icono está oculto en **^**, arrástralo junto al reloj.
 
-Un clic abre únicamente las dos líneas con sus barras, etiquetas y porcentajes **restantes**. Los colores verde/amarillo/rojo indican más del 25%, hasta el 25% y hasta el 10%. Gris y `—%` significan dato no disponible, no cuota agotada.
+Un clic abre las pestañas y las dos líneas con sus barras, etiquetas y porcentajes **restantes** del proveedor seleccionado. Los colores verde/amarillo/rojo indican más del 25%, hasta el 25% y hasta el 10%. Gris y `—%` significan dato no disponible, no cuota agotada. La franja de color y el tooltip identifican al proveedor visible.
 
 ## Proveedores
 
@@ -85,7 +106,9 @@ Los ajustes no secretos se guardan en `%APPDATA%\QuotaDock\settings.json`, y la 
 
 Activa **Iniciar con Windows** desde el menú o el instalador. Se usa únicamente `HKCU\…\Run\QuotaDock`. En modo portable apunta a la ruta actual: si mueves el ejecutable, desactiva y reactiva la opción desde su nueva ubicación.
 
-La versión 1.1.0 no modifica ni borra los ejecutables de 1.0.0 ni sus accesos de inicio. **Para migrar:** sal de los iconos antiguos, retira sus accesos de `shell:startup` y utiliza solo `QuotaDock.exe`. No ejecutes ambas versiones si no quieres duplicar iconos y consultas. La configuración de proveedores se hace ahora desde el menú único.
+La versión 1.2.0 conserva tus proveedores activados, claves cifradas y esperas. La primera vez elige el primer proveedor activado; después recuerda el que selecciones. Cierra la versión anterior antes de instalar para sustituir el ejecutable. No necesitas repetir el inicio de sesión.
+
+No se modifican ni borran los ejecutables independientes de 1.0.0 ni sus accesos de inicio. Si aún los usas, cierra sus iconos y retira sus accesos de `shell:startup` para evitar duplicar consultas.
 
 ## Desinstalar
 
@@ -107,7 +130,7 @@ En modo portable, desactiva primero el inicio automático, sal y borra el ejecut
 Requisitos: Windows 10/11 y .NET Framework 4.x; sin Python, Node, NuGet ni SDK moderno de .NET.
 
 ```powershell
-.\build.ps1          # dist\v1.1.0\QuotaDock.exe
+.\build.ps1          # dist\v1.2.0\QuotaDock.exe
 .\test.ps1           # pruebas sintéticas, HTTP simulado, DPAPI e instalación aislada
 .\release.ps1        # aplicación, instalador, ZIP y SHA-256
 .\package-test.ps1   # recursos del instalador y desinstalación en sandbox

@@ -1,7 +1,7 @@
 param([switch]$RequireSigned)
 $ErrorActionPreference = 'Stop'
 & (Join-Path $PSScriptRoot 'build.ps1')
-$version = '1.1.0'
+$version = '1.2.0'
 $output = Join-Path $PSScriptRoot "dist\v$version"
 & (Join-Path $PSScriptRoot 'sign.ps1') -Files @("$output\QuotaDock.exe") -RequireSigned:$RequireSigned
 $compiler = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
@@ -15,8 +15,11 @@ $references = @('/r:System.Windows.Forms.dll', '/r:System.Drawing.dll', '/r:Syst
 if ($LASTEXITCODE -ne 0) { throw 'Error compilando instalador' }
 & (Join-Path $PSScriptRoot 'sign.ps1') -Files @($setup) -RequireSigned:$RequireSigned
 foreach ($name in @('README.md', 'CHANGELOG.md', 'PROVIDERS.md')) { Copy-Item (Join-Path $PSScriptRoot $name) (Join-Path $output $name) -Force }
+$images = Join-Path $output 'docs\images'
+New-Item -ItemType Directory -Path $images -Force | Out-Null
+Copy-Item (Join-Path $PSScriptRoot 'docs\images\*.png') $images -Force
 $zip = Join-Path $output "QuotaDock-$version-Windows-Portable.zip"
-Compress-Archive -Path @("$output\QuotaDock.exe", "$output\README.md", "$output\CHANGELOG.md", "$output\PROVIDERS.md") -DestinationPath $zip -Force
+Compress-Archive -Path @("$output\QuotaDock.exe", "$output\README.md", "$output\CHANGELOG.md", "$output\PROVIDERS.md", "$output\docs") -DestinationPath $zip -Force
 $assets = @($setup, $zip, "$output\QuotaDock.exe")
 $hashes = foreach ($asset in $assets) { '{0}  {1}' -f (Get-FileHash -LiteralPath $asset -Algorithm SHA256).Hash.ToLowerInvariant(), (Split-Path $asset -Leaf) }
 $hashes | Set-Content -Path (Join-Path $output 'SHA256SUMS.txt') -Encoding ASCII

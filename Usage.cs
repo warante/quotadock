@@ -194,7 +194,7 @@ namespace UsageTray
             using (var request = new HttpRequestMessage(body == null ? HttpMethod.Get : HttpMethod.Post, endpoint))
             {
                 request.Headers.TryAddWithoutValidation("Authorization", provider.Kind == "zai" ? auth.Token : (provider.Kind == "copilot" ? "token " : "Bearer ") + auth.Token);
-                request.Headers.UserAgent.ParseAdd("QuotaDock/1.1.0");
+                request.Headers.UserAgent.ParseAdd("QuotaDock/1.2.0");
                 request.Headers.Accept.ParseAdd("application/json");
                 if (provider.Kind == "claude") request.Headers.Add("anthropic-beta", "oauth-2025-04-20");
                 if (provider.Kind == "codex" && !string.IsNullOrWhiteSpace(auth.Account)) request.Headers.Add("ChatGPT-Account-Id", auth.Account);

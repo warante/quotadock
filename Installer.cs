@@ -13,10 +13,10 @@ internal sealed class Installer : Form
     private readonly Button install = new Button { Text = "Instalar", Left = 245, Top = 175, Width = 110, Height = 32 };
     private Installer()
     {
-        Text = "QuotaDock 1.1.0"; ClientSize = new Size(390, 230);
+        Text = "QuotaDock 1.2.0"; ClientSize = new Size(390, 230);
         FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false;
         StartPosition = FormStartPosition.CenterScreen; Font = new Font("Segoe UI", 9);
-        Controls.Add(new Label { Text = "Todos tus proveedores en una sola aplicación.\nInstalación para tu usuario, sin administrador.\nSelecciona proveedores y alertas desde el icono.", Left = 24, Top = 16, Width = 350, Height = 65 });
+        Controls.Add(new Label { Text = "Un icono, dos barras y todos tus proveedores.\nInstalación para tu usuario, sin administrador.\nPulsa el icono para cambiar de proveedor.", Left = 24, Top = 16, Width = 350, Height = 65 });
         Controls.AddRange(new Control[] { startup, launch, install });
         install.Click += delegate {
             install.Enabled = false;

@@ -71,6 +71,13 @@ internal static class Tests
             Check(gate.Observe(meter, 10), "New cycle alert");
             var settings = new SettingsStore(root); settings.Save(new Preferences { Enabled = new[] { "kimi", "claude" }, Alerts = true, Threshold = 20 });
             Check(settings.Load().Enabled.Length == 2 && settings.Load().Threshold == 20, "Preferences roundtrip");
+            Check(settings.Load().ResolveSelection() == "kimi", "Migration without selected provider picks an enabled account");
+            settings.Save(new Preferences { Enabled = new[] { "openai", "claude" }, SelectedProvider = "claude" });
+            Check(settings.Load().ResolveSelection() == "claude", "Selected provider persists");
+            var selection = new Preferences { Enabled = new[] { "openai", "kimi" }, SelectedProvider = "claude" };
+            Check(selection.ResolveSelection() == "openai", "Disabling selected provider picks enabled fallback");
+            selection.Enabled = new string[0]; Check(selection.ResolveSelection() == null, "No enabled providers still has a control state");
+            selection.Enabled = new[] { "invalid", "kimi" }; Check(selection.ResolveSelection() == "kimi", "Unknown provider cannot be selected");
             settings.SaveSchedules(new Dictionary<string, RetryPolicy> { { "claude", retry } });
             Check(settings.LoadSchedules()["claude"].Next == retry.Next, "Cooldown survives application restart");
             var vault = new CredentialStore(root); var p = Providers.Find("kimi");

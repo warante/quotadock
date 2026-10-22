@@ -9,7 +9,7 @@ $patterns = @{
 }
 $sources = @(Get-ChildItem -LiteralPath $PSScriptRoot -Recurse -File -Force | Where-Object { $_.FullName -notmatch '[\\/](?:dist|\.git)[\\/]' } | Select-Object -ExpandProperty FullName)
 $files = $sources
-$release = Join-Path $PSScriptRoot 'dist\v1.1.0'
+$release = Join-Path $PSScriptRoot 'dist\v1.2.0'
 if (Test-Path $release) {
     $files += @(Get-ChildItem -LiteralPath $release -File | Where-Object { $_.Extension -ne '.zip' } | Select-Object -ExpandProperty FullName)
 }
@@ -33,7 +33,9 @@ if (Test-Path $release) {
         $archive = [IO.Compression.ZipFile]::OpenRead($zip.FullName)
         try {
             foreach ($entry in $archive.Entries) {
-                if ($entry.FullName -notin @('QuotaDock.exe', 'README.md', 'CHANGELOG.md', 'PROVIDERS.md')) { throw "Unexpected ZIP entry: $($entry.FullName)" }
+                $entryName = $entry.FullName.Replace('\', '/')
+                if ($entryName.EndsWith('/')) { continue }
+                if ($entryName -notin @('QuotaDock.exe', 'README.md', 'CHANGELOG.md', 'PROVIDERS.md', 'docs/images/quotadock-preview.png', 'docs/images/provider-selector.png')) { throw "Unexpected ZIP entry: $entryName" }
                 $stream = $entry.Open()
                 $memory = New-Object IO.MemoryStream
                 try { $stream.CopyTo($memory); $bytes = $memory.ToArray() } finally { $stream.Dispose(); $memory.Dispose() }

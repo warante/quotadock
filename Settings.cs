@@ -15,8 +15,14 @@ namespace UsageTray
     {
         public string[] Enabled = { "openai" };
         public string[] Monthly = new string[0];
+        public string SelectedProvider = "openai";
         public bool Alerts;
         public int Threshold = 10;
+        public string ResolveSelection()
+        {
+            if (Enabled.Contains(SelectedProvider) && Providers.Find(SelectedProvider) != null) return SelectedProvider;
+            return Enabled.FirstOrDefault(id => Providers.Find(id) != null);
+        }
     }
 
     public sealed class SettingsStore
@@ -31,6 +37,7 @@ namespace UsageTray
             return new Preferences {
                 Enabled = Json.Items(Json.Get(value, "enabled")).Select(Json.Text).Where(id => Providers.Find(id) != null).Distinct().ToArray(),
                 Monthly = Json.Items(Json.Get(value, "monthly")).Select(Json.Text).Where(id => Providers.Find(id) != null).Distinct().ToArray(),
+                SelectedProvider = Json.Text(Json.Get(value, "selectedProvider")),
                 Alerts = object.Equals(Json.Get(value, "alerts"), true),
                 Threshold = Math.Max(1, Math.Min(50, (int)(Json.Number(Json.Get(value, "threshold")) ?? 10)))
             };
@@ -38,7 +45,7 @@ namespace UsageTray
         public void Save(Preferences prefs)
         {
             AtomicWrite(Path.Combine(DirectoryPath, "settings.json"), Encoding.UTF8.GetBytes(Json.Serialize(new {
-                enabled = prefs.Enabled, monthly = prefs.Monthly, alerts = prefs.Alerts, threshold = prefs.Threshold
+                enabled = prefs.Enabled, monthly = prefs.Monthly, selectedProvider = prefs.ResolveSelection(), alerts = prefs.Alerts, threshold = prefs.Threshold
             })));
         }
         public Dictionary<string, RetryPolicy> LoadSchedules()

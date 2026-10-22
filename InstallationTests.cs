@@ -32,7 +32,7 @@ internal static class InstallationTests
             Func<string, byte[]> resources = name => System.Text.Encoding.UTF8.GetBytes(name);
             platform.Files[Path.Combine(root, "unrelated.txt")] = new byte[] { 123 };
             engine.Install(root, programs, true, "powershell", resources);
-            Check(platform.Files.Count == 5 && platform.Startup == "\"" + Path.Combine(root, "QuotaDock.exe") + "\"" && (string)platform.Registration["DisplayVersion"] == "1.1.0");
+            Check(platform.Files.Count == 5 && platform.Startup == "\"" + Path.Combine(root, "QuotaDock.exe") + "\"" && (string)platform.Registration["DisplayVersion"] == "1.2.0");
             engine.Install(root, programs, false, "powershell", resources); Check(platform.Files.Count == 5 && platform.Startup == null);
             var before = platform.Files.ToDictionary(x => x.Key, x => x.Value);
             platform.Startup = "previous-portable-app";

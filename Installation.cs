@@ -58,7 +58,7 @@ namespace UsageTray
                 if (startup) platform.Startup = command;
                 else if (platform.Startup == command) platform.Startup = null;
                 platform.Registration = new Dictionary<string, object> {
-                    { "DisplayName", "QuotaDock" }, { "DisplayVersion", "1.1.0" }, { "Publisher", "QuotaDock" },
+                    { "DisplayName", "QuotaDock" }, { "DisplayVersion", "1.2.0" }, { "Publisher", "QuotaDock" },
                     { "InstallLocation", root }, { "DisplayIcon", target },
                     { "UninstallString", "\"" + powershell + "\" " + arguments }, { "NoModify", 1 }, { "NoRepair", 1 }
                 };

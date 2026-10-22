@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.0 — 2026-10-22 (hora peninsular española)
+
+- Un único icono en la bandeja, con las dos barras del proveedor seleccionado.
+- Selector de proveedores mediante pestañas al pulsar el icono; admite navegación con flechas y todas las regiones.
+- Selección persistente y alternativa automática al desactivar el proveedor visible.
+- Los demás proveedores siguen actualizándose y notificando sin generar iconos adicionales.
+- Cambiar de pestaña muestra los datos ya consultados, sin nuevas peticiones ni reiniciar las esperas.
+- Vistas previas de la interfaz con datos ficticios en el README y en el ZIP portable.
+- Panel redondeado, pestañas dibujadas a mano con hover y foco de teclado, barras suaves, tipografía cuidada y menú oscuro; sin dependencias ni temporizadores gráficos adicionales.
+- Pruebas de repintado del panel y actualización de iconos para comprobar que no se acumulan recursos GDI.
+
 ## 1.1.0 — 2026-10-22 (hora peninsular española)
 
 - Un único ejecutable, selector de proveedores e inicio automático desde el menú.

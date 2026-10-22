@@ -28,9 +28,9 @@ jobs:
         run: .\privacy-check.ps1
       - uses: actions/upload-artifact@v4
         with:
-          name: QuotaDock-1.1.0-Windows
+          name: QuotaDock-1.2.0-Windows
           path: |
-            dist/v1.1.0/QuotaDock-1.1.0-Setup.exe
-            dist/v1.1.0/QuotaDock-1.1.0-Windows-Portable.zip
-            dist/v1.1.0/QuotaDock.exe
-            dist/v1.1.0/SHA256SUMS.txt
+            dist/v1.2.0/QuotaDock-1.2.0-Setup.exe
+            dist/v1.2.0/QuotaDock-1.2.0-Windows-Portable.zip
+            dist/v1.2.0/QuotaDock.exe
+            dist/v1.2.0/SHA256SUMS.txt
