@@ -10,6 +10,7 @@ Revisión de requisitos: **22 de octubre de 2026, hora peninsular española**. [
 - Políticas de privacidad, contribución, seguridad y [Code signing policy](docs/code-signing-policy.md), con roles identificados y atribución condicional correcta.
 - Pruebas sin cuentas reales, auditoría de artefactos e historial y metadatos de producto y versión en ambos ejecutables.
 - Configuración de referencia para un flujo de firma en dos etapas: aplicación y, después, instalador que la contiene.
+- Repositorio ya público con MIT y reporte privado de vulnerabilidades habilitado tras la revisión de privacidad.
 
 ## Requisitos que no puede conceder el código
 

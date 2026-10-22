@@ -17,7 +17,8 @@ Objetivo: estudiar la admisión en **SignPath Foundation**, no generar un certif
 - [x] Licencia MIT confirmada por el propietario, `LICENSE` y avisos de terceros añadidos.
 - [x] Documentación de privacidad, contribución, seguridad, conducta y Code signing policy preparada.
 - [x] Autorizar el permiso `workflow` y preparar el workflow activo de pruebas, compilación, auditoría e integración. Verificar su primera ejecución antes de dar CI por completada.
-- [ ] Confirmar la primera ejecución completa de GitHub Actions y registrar el cambio de visibilidad tras la auditoría final.
+- [x] Cambiar a público con MIT tras repetir la auditoría sobre el commit final; activar reporte privado de vulnerabilidades.
+- [x] Primera ejecución completa de GitHub Actions correcta: https://github.com/warante/quotadock/actions/runs/39831379133.
 - [x] Revisar mantenimiento, reputación y trazabilidad; no se presupone la admisión.
 - [x] Preparar texto de solicitud, configuración de artefactos y plantilla de firma en dos etapas con aprobación manual; sin claves privadas en el repositorio.
 - [ ] El propietario debe completar el formulario, MFA, cuenta/app de SignPath y la configuración real de políticas, aprobadores y entorno protegido.

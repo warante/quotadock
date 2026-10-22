@@ -12,6 +12,10 @@ Fecha: **22 de octubre de 2026, hora peninsular española**.
 
 Los cambios nuevos se auditan otra vez antes de subirlos y antes del cambio de visibilidad. El número de objetos aumenta con los commits; la cifra anterior identifica la revisión inicial, no un límite del script.
 
+## Apertura efectuada
+
+Tras añadir el código y la documentación de preparación en el commit `7a0bb16`, se repitieron las comprobaciones: **157 objetos Git** y las fuentes y artefactos de desarrollo, sin hallazgos pendientes. Después se cambió el repositorio a **público**, GitHub reconoció la licencia **MIT** y se habilitó el reporte privado de vulnerabilidades. La autorización `workflow` se completó y el primer workflow se inició; su resultado se registra en `TODO.md`.
+
 ## Decisiones del propietario
 
 El propietario confirmó la licencia **MIT** y autorizó cambiar el repositorio de privado a público **solo después de la auditoría**. No autorizó inventar datos de contacto, declarar una aprobación de SignPath ni aceptar términos externos en su nombre.
