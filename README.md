@@ -165,6 +165,8 @@ Se firma primero la aplicación, después se incrusta en el instalador, se firma
 
 `.github/workflows/windows.yml` ejecuta las pruebas, compilación, auditorías y comprobación del kit de integración en GitHub Actions. No utiliza credenciales de proveedores. `ci/signpath.yml` sigue siendo una plantilla sin activar: prepara una firma en dos etapas únicamente tras la admisión y configuración de SignPath. Como alternativa local, `.githooks/pre-push` ejecuta la verificación antes de una subida cuando configuras `git config core.hooksPath .githooks`.
 
+En los pull requests se comprueba el commit exacto de la rama propuesta y su historial completo, no el commit de fusión sintético que genera GitHub con metadatos propios. Las pruebas de integración con la rama base no se simulan en ese checkout; `main` vuelve a verificarse tras la fusión. No se relajan los filtros de privacidad ni se ejecuta el flujo de firma desde PRs.
+
 Si la política de tu equipo bloquea scripts o ejecutables sin firmar, utiliza mecanismos aprobados por tu administrador; no desactives el control de aplicaciones.
 
 ## Historial

@@ -3,6 +3,7 @@
 ## 1.3.0 — en desarrollo
 
 - Reinicio minimalista junto al porcentaje: `26% | 21:16 ⓘ` en 5 horas y `80% | 04/11 ⓘ` en la semanal, con tooltip completo solo sobre el icono de información y sin segunda línea.
+- CI de pull requests sobre el commit exacto de la rama propuesta, sin confundir los metadatos del merge sintético de GitHub con commits del proyecto.
 
 - Consulta de restablecimientos por cuota junto al porcentaje y desde el menú, sin recargar el panel.
 - Conversión a hora peninsular española con CET/CEST, fechas parciales explícitas y rechazo de datos inválidos, ambiguos o antiguos.
