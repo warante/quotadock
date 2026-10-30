@@ -30,6 +30,7 @@ internal static class Tests
         try
         {
             Check(new Preferences().Enabled.Length == 0, "Fresh installation does not query providers without selection");
+            UpdateTests.Run(Check, root);
             var normal = Usage.Parse("codex", "{\"rate_limit\":{\"primary_window\":{\"used_percent\":23,\"limit_window_seconds\":18000},\"secondary_window\":{\"used_percent\":64.5,\"limit_window_seconds\":604800}}}");
             Check(Value(normal, "session") == 77 && Value(normal, "weekly") == 35.5, "Codex percentages");
             var weekly = Usage.Parse("codex", "{\"rate_limit\":{\"primary_window\":{\"used_percent\":70,\"limit_window_seconds\":604800},\"secondary_window\":null}}");
@@ -72,6 +73,10 @@ internal static class Tests
             Check(gate.Observe(meter, 10), "New cycle alert");
             var settings = new SettingsStore(root); settings.Save(new Preferences { Enabled = new[] { "kimi", "claude" }, Alerts = true, Threshold = 20 });
             Check(settings.Load().Enabled.Length == 2 && settings.Load().Threshold == 20, "Preferences roundtrip");
+            Check(settings.Load().CheckUpdatesOnStart, "Startup update detection enabled by default");
+            settings.Save(new Preferences { CheckUpdatesOnStart = false });
+            Check(!settings.Load().CheckUpdatesOnStart, "Startup update detection can be disabled and persists");
+            settings.Save(new Preferences { Enabled = new[] { "kimi", "claude" }, Alerts = true, Threshold = 20 });
             Check(settings.Load().ResolveSelection() == "kimi", "Migration without selected provider picks an enabled account");
             settings.Save(new Preferences { Enabled = new[] { "openai", "claude" }, SelectedProvider = "claude" });
             Check(settings.Load().ResolveSelection() == "claude", "Selected provider persists");

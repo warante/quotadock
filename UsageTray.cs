@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -245,6 +246,12 @@ namespace UsageTray
         private readonly System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
         private readonly HttpClient client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false });
         private readonly NotifyIcon tray = new NotifyIcon();
+        private readonly HttpClient updateClient = Updates.CreateClient();
+        private readonly CancellationTokenSource updateCancel = new CancellationTokenSource();
+        private EventWaitHandle updateExit;
+        private bool updateBusy, updateBalloon;
+        private AppUpdate availableUpdate;
+        private DateTimeOffset nextUpdateCheck;
         private Icon currentIcon;
         private bool stopped;
 
@@ -267,11 +274,13 @@ namespace UsageTray
             };
             Apply();
             tray.Visible = true;
+            tray.BalloonTipClicked += async delegate { if (updateBalloon) { updateBalloon = false; await CheckAppUpdate(true); } };
             timer.Interval = 5000; timer.Tick += async delegate { await Tick(); };
             if (!startPolling) return;
+            updateExit = new EventWaitHandle(false, EventResetMode.AutoReset, "Local\\QuotaDock.ExitForUpdate." + Process.GetCurrentProcess().Id);
             timer.Start();
             EventHandler initial = null;
-            initial = async delegate { Application.Idle -= initial; await Tick(); };
+            initial = async delegate { Application.Idle -= initial; await Task.WhenAll(Tick(), prefs.CheckUpdatesOnStart ? CheckAppUpdate(false) : Task.FromResult(0)); };
             Application.Idle += initial;
         }
 
@@ -293,6 +302,7 @@ namespace UsageTray
         }
         internal string SelectedProviderId { get { return prefs.ResolveSelection(); } }
         internal string TrayText { get { return tray.Text; } }
+        internal ContextMenuStrip AppMenu { get { return tray.ContextMenuStrip; } }
         internal Task RefreshProvider(string id) { return Refresh(states[id]); }
         private void PaintSelected()
         {
@@ -319,7 +329,7 @@ namespace UsageTray
                     for (int i = 0; i < 2; i++) resets.DropDownItems[i].Text = meters[i].Label + " · " + ResetInfo.Describe(meters[i].Remaining.HasValue ? meters[i].Reset : null, DateTimeOffset.UtcNow);
                 };
                 menu.Items.Add(resets);
-                menu.Items.Add("Actualizar (respeta la espera)", null, async delegate {
+                menu.Items.Add("Actualizar cuotas (respeta la espera)", null, async delegate {
                     if (!state.Policy.CanFetch(DateTimeOffset.UtcNow)) { MessageBox.Show("La siguiente consulta estará disponible en " + Math.Max(1, Math.Ceiling((state.Policy.Next - DateTimeOffset.UtcNow).TotalSeconds)) + " s.", "QuotaDock"); return; }
                     await Refresh(state);
                 });
@@ -364,7 +374,14 @@ namespace UsageTray
                 thresholds.DropDownItems.Add(item);
             }
             menu.Items.Add(thresholds);
-            menu.Items.Add("Acerca de", null, delegate { MessageBox.Show("QuotaDock 1.3.0 · MIT\nUn icono, dos barras y selector de proveedor. Sin telemetría.\nPasa el ratón sobre una barra para consultar su reinicio.\n\nLas cuotas proceden del proveedor, no de estimaciones. Los endpoints internos pueden cambiar.", "QuotaDock"); });
+            menu.Items.Add(new ToolStripSeparator());
+            var updates = new ToolStripMenuItem(updateBusy ? "Comprobando / descargando actualización…" : availableUpdate == null ? "Buscar actualizaciones…" : "Actualizar a " + availableUpdate.Version + "…") { Name = "app-update", Enabled = !updateBusy };
+            updates.Click += async delegate { await CheckAppUpdate(true); };
+            menu.Items.Add(updates);
+            var updateStartup = new ToolStripMenuItem("Buscar nuevas versiones al iniciar") { Checked = prefs.CheckUpdatesOnStart };
+            updateStartup.Click += delegate { Change(delegate { prefs.CheckUpdatesOnStart = !prefs.CheckUpdatesOnStart; }); };
+            menu.Items.Add(updateStartup);
+            menu.Items.Add("Acerca de", null, delegate { MessageBox.Show("QuotaDock " + Updates.CurrentVersion + " · MIT\nUn icono, dos barras y selector de proveedor. Sin telemetría.\nEl icono ⓘ muestra el detalle del reinicio.\n\nLas actualizaciones siempre requieren confirmación. GitHub se consulta al iniciar si lo permites en el menú.\nLas APIs de cuotas pueden cambiar.", "QuotaDock"); });
             menu.Items.Add("Salir", null, delegate { ExitThread(); });
             menu.Opening += delegate {
                 if (state != null) menu.Items["status"].Text = state.Status;
@@ -374,7 +391,7 @@ namespace UsageTray
 
         private void Change(Action action)
         {
-            Preferences previous = new Preferences { Enabled = prefs.Enabled, Monthly = prefs.Monthly, SelectedProvider = prefs.SelectedProvider, Alerts = prefs.Alerts, Threshold = prefs.Threshold };
+            Preferences previous = new Preferences { Enabled = prefs.Enabled, Monthly = prefs.Monthly, SelectedProvider = prefs.SelectedProvider, Alerts = prefs.Alerts, Threshold = prefs.Threshold, CheckUpdatesOnStart = prefs.CheckUpdatesOnStart };
             try { action(); prefs.SelectedProvider = prefs.ResolveSelection(); store.Save(prefs); Apply(); }
             catch { prefs = previous; MessageBox.Show("No se pudo guardar la configuración. Comprueba los permisos del perfil de Windows.", "QuotaDock"); }
         }
@@ -424,6 +441,8 @@ namespace UsageTray
         }
         private async Task Tick()
         {
+            if (stopped) return;
+            if (updateExit != null && updateExit.WaitOne(0)) { ExitThread(); return; }
             foreach (var disposable in timerDisposals.ToArray()) disposable.Dispose(); timerDisposals.Clear();
             await Task.WhenAll(states.Values.Where(s => !s.Busy && s.Policy.CanFetch(DateTimeOffset.UtcNow)).Select(Refresh).ToArray());
         }
@@ -454,8 +473,11 @@ namespace UsageTray
                     PersistPolicies(state);
                     UpdatePopup(state);
                     var crossed = data.Meters.Where(m => state.Gate.Observe(m, prefs.Threshold)).ToArray();
-                    if (prefs.Alerts && crossed.Any()) tray.ShowBalloonTip(7000, state.Provider.Name,
-                        string.Join(" · ", crossed.Select(m => m.Label + ": " + Visuals.Percent(m.Remaining))), ToolTipIcon.Warning);
+                    if (prefs.Alerts && crossed.Any())
+                    {
+                        updateBalloon = false;
+                        tray.ShowBalloonTip(7000, state.Provider.Name, string.Join(" · ", crossed.Select(m => m.Label + ": " + Visuals.Percent(m.Remaining))), ToolTipIcon.Warning);
+                    }
                 }
             }
             catch (Exception ex)
@@ -478,9 +500,60 @@ namespace UsageTray
             try { store.SaveSchedules(policies); }
             catch { state.Status += " · no se pudo guardar la espera para el próximo inicio"; }
         }
+        private async Task CheckAppUpdate(bool manual)
+        {
+            if (stopped || updateBusy) return;
+            bool useCached = availableUpdate != null && DateTimeOffset.UtcNow < nextUpdateCheck;
+            if (DateTimeOffset.UtcNow < nextUpdateCheck && !useCached)
+            {
+                if (manual) MessageBox.Show("Espera un minuto entre comprobaciones de versión y vuelve a intentarlo.", "QuotaDock");
+                return;
+            }
+            updateBusy = true; nextUpdateCheck = DateTimeOffset.UtcNow.AddMinutes(1); RebuildMenus();
+            try
+            {
+                if (!useCached)
+                    using (var timeout = CancellationTokenSource.CreateLinkedTokenSource(updateCancel.Token))
+                    {
+                        timeout.CancelAfter(TimeSpan.FromSeconds(20));
+                        availableUpdate = await Updates.Check(updateClient, new Version(Updates.CurrentVersion), timeout.Token);
+                    }
+                if (stopped || (!manual && !prefs.CheckUpdatesOnStart)) return;
+                if (availableUpdate == null)
+                {
+                    if (manual) MessageBox.Show("Ya tienes la última versión estable de QuotaDock.", "QuotaDock");
+                    return;
+                }
+                if (!manual)
+                {
+                    updateBalloon = true;
+                    tray.ShowBalloonTip(10000, "Nueva versión de QuotaDock", "Disponible " + availableUpdate.Version + ". Usa Buscar actualizaciones en el menú. No se instalará sin tu permiso.", ToolTipIcon.Info);
+                    return;
+                }
+                string installedPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "QuotaDock", "QuotaDock.exe");
+                bool installed = string.Equals(Path.GetFullPath(Application.ExecutablePath), installedPath, StringComparison.OrdinalIgnoreCase);
+                string mode = installed ? "Se actualizará la instalación de tu usuario y se conservarán ajustes y claves. El instalador pedirá confirmar antes de cerrar esta instancia." : "Estás en modo portable: se instalará para tu usuario. La copia portable no se sustituirá; deberás cerrarla antes de abrir la instalada.";
+                if (MessageBox.Show("Hay una nueva versión: " + availableUpdate.Version + ".\n\n¿Descargar y abrir su instalador oficial de GitHub?\n" + mode + "\n\nSe comprobará SHA-256 con los metadatos de GitHub. Esto no equivale a una firma digital. Los binarios pueden estar sin firmar y Windows puede bloquearlos. No se solicitan privilegios de administrador.", "Actualizar QuotaDock", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) != DialogResult.Yes) return;
+                using (var timeout = CancellationTokenSource.CreateLinkedTokenSource(updateCancel.Token))
+                {
+                    timeout.CancelAfter(TimeSpan.FromSeconds(90));
+                    string folder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "QuotaDock", "Updates", Guid.NewGuid().ToString("N"));
+                    string file = await Updates.Download(updateClient, availableUpdate, folder, timeout.Token);
+                    if (stopped) return;
+                    using (var process = Process.Start(new ProcessStartInfo(file) { UseShellExecute = true })) { }
+                }
+            }
+            catch
+            {
+                if (!stopped && manual) MessageBox.Show("No se pudo comprobar, verificar o abrir la actualización. No se ha modificado tu instalación. Comprueba la conexión o vuelve a intentarlo más tarde; si Windows la bloquea, solicita aprobación, no desactives las protecciones.", "QuotaDock", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            finally { updateBusy = false; if (!stopped) RebuildMenus(); }
+        }
         protected override void ExitThreadCore()
         {
             stopped = true; timer.Stop(); timer.Dispose();
+            updateCancel.Cancel(); updateCancel.Dispose(); updateClient.Dispose();
+            if (updateExit != null) updateExit.Dispose();
             foreach (var state in states.Values) state.Dispose();
             foreach (var menu in timerDisposals) menu.Dispose();
             tray.Visible = false; tray.ContextMenuStrip.Dispose(); tray.Dispose(); if (currentIcon != null) currentIcon.Dispose();

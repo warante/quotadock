@@ -2,10 +2,36 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Diagnostics;
+using System.Threading;
 using Microsoft.Win32;
 
 namespace UsageTray
 {
+    public static class InstalledInstance
+    {
+        // Only cooperate with the exact per-user installation. Never kill a process
+        // by name, stop a portable copy, or bypass Windows policy.
+        public static bool RequestClose(string target)
+        {
+            foreach (var process in Process.GetProcessesByName("QuotaDock"))
+            using (process)
+            {
+                try
+                {
+                    if (process.HasExited || !string.Equals(Path.GetFullPath(process.MainModule.FileName), Path.GetFullPath(target), StringComparison.OrdinalIgnoreCase)) continue;
+                    using (var signal = EventWaitHandle.OpenExisting("Local\\QuotaDock.ExitForUpdate." + process.Id)) signal.Set();
+                    if (!process.WaitForExit(15000)) return false;
+                }
+                catch (InvalidOperationException) { }
+                catch (WaitHandleCannotBeOpenedException) { return false; }
+                catch (System.ComponentModel.Win32Exception) { return false; }
+                catch (UnauthorizedAccessException) { return false; }
+            }
+            return true;
+        }
+    }
+
     public enum LaunchOutcome { Started, BlockedByPolicy, Failed }
 
     public static class InstalledAppLauncher
@@ -60,7 +86,7 @@ namespace UsageTray
                 if (startup) platform.Startup = command;
                 else if (platform.Startup == command) platform.Startup = null;
                 platform.Registration = new Dictionary<string, object> {
-                    { "DisplayName", "QuotaDock" }, { "DisplayVersion", "1.3.0" }, { "Publisher", "QuotaDock" },
+                    { "DisplayName", "QuotaDock" }, { "DisplayVersion", "1.4.0" }, { "Publisher", "QuotaDock" },
                     { "InstallLocation", root }, { "DisplayIcon", target },
                     { "UninstallString", "\"" + powershell + "\" " + arguments }, { "NoModify", 1 }, { "NoRepair", 1 }
                 };

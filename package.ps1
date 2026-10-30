@@ -1,6 +1,6 @@
 param([switch]$RequireSigned)
 $ErrorActionPreference = 'Stop'
-$version = '1.3.0'
+$version = '1.4.0'
 $output = Join-Path $PSScriptRoot "dist\v$version"
 $app = Join-Path $output 'QuotaDock.exe'
 $setup = Join-Path $output "QuotaDock-$version-Setup.exe"

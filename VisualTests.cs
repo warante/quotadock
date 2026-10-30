@@ -81,6 +81,12 @@ internal static class VisualTests
                 return Task.FromResult(Usage.Parse("claude", "{\"five_hour\":{\"utilization\":10},\"seven_day\":{\"utilization\":20}}"));
             }, false))
             {
+                if (app.AppMenu.Items["app-update"] == null || app.AppMenu.Items["app-update"].Text != "Buscar actualizaciones…") throw new Exception("App update action must be available separately from quota refresh");
+                var startupUpdate = app.AppMenu.Items.OfType<ToolStripMenuItem>().Single(i => i.Text == "Buscar nuevas versiones al iniciar");
+                startupUpdate.PerformClick();
+                if (store.Load().CheckUpdatesOnStart) throw new Exception("Update startup checks must be disableable from the menu");
+                app.AppMenu.Items.OfType<ToolStripMenuItem>().Single(i => i.Text == "Buscar nuevas versiones al iniciar").PerformClick();
+                if (!store.Load().CheckUpdatesOnStart || requests != 0) throw new Exception("Changing update preferences must not query providers");
                 app.SelectProvider("claude");
                 if (requests != 0 || store.Load().SelectedProvider != "claude" || !app.TrayText.Contains("Claude")) throw new Exception("Selection must persist without making an API request");
                 app.RefreshProvider("kimi").GetAwaiter().GetResult();

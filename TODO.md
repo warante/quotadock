@@ -33,3 +33,13 @@ Objetivo: estudiar la admisión en **SignPath Foundation**, no generar un certif
 - [ ] Integrar y desplegar en el repositorio de Piconera Tech cuando su propietario lo decida. No se ha modificado esa web.
 
 **Autorizado:** licencia MIT y apertura del repositorio tras una auditoría sin hallazgos pendientes. **Pendiente de confirmación específica:** envío de datos personales o aceptación de condiciones en SignPath y permisos/configuraciones externos que no se hayan aprobado expresamente.
+
+## 4. Actualizaciones de la aplicación (1.4.0)
+
+- [x] Comprobar la última release estable al iniciar, con opción de desactivarlo y sin descarga automática.
+- [x] Añadir búsqueda manual de versiones al menú, separada de la actualización de cuotas.
+- [x] Pedir confirmación antes de descargar/abrir el instalador y antes de sustituir una instalación existente.
+- [x] Validar destino HTTPS, tamaño, SHA-256 y metadatos; cliente sin credenciales ni cookies de proveedores.
+- [x] Permitir cierre ordenado de la instancia instalada tras confirmación, sin terminar procesos a la fuerza ni cerrar copias portables.
+- [x] Probar versiones, errores, redirecciones, descargas corruptas y cierre cooperativo con datos/procesos aislados.
+- [ ] Publicación de 1.4.0 autorizada: pendiente de PR, CI, fusión y verificación final de la release. Para migrar desde 1.3.0 hay que cerrar y actualizar manualmente una primera vez.

@@ -8,7 +8,7 @@ Tus cuotas de IA junto al reloj, sin llenar la bandeja de iconos. Pulsa para cam
 
 **Windows 10/11 · MIT · Portable o instalable · Sin administrador**
 
-**Versión 1.3.0**, con restablecimientos compactos e iconos de información. Descarga la versión publicada en **[Releases](https://github.com/warante/quotadock/releases/latest)**; `main` puede incorporar cambios posteriores.
+**Versión 1.4.0**, con restablecimientos compactos, aviso de nuevas versiones y actualización siempre confirmada por el usuario. Descarga la versión publicada en **[Releases](https://github.com/warante/quotadock/releases/latest)**; `main` puede incorporar cambios posteriores.
 
 <p align="center">
   <img src="docs/images/quotadock-preview.png" alt="QuotaDock con un único icono junto al reloj y pestañas para cambiar entre OpenAI, Claude y Kimi" width="880">
@@ -41,7 +41,7 @@ También puedes cambiar desde **clic derecho → Proveedor visible**. Las flecha
 
 ## Descargar
 
-En **[Releases](https://github.com/warante/quotadock/releases/latest)** encontrarás la última versión publicada. Los scripts de 1.3.0 generan sus artefactos en `dist\v1.3.0`:
+En **[Releases](https://github.com/warante/quotadock/releases/latest)** encontrarás la última versión publicada. Los scripts de 1.4.0 generan sus artefactos en `dist\v1.4.0`:
 
 | Artefacto | Uso |
 | --- | --- |
@@ -52,11 +52,24 @@ En **[Releases](https://github.com/warante/quotadock/releases/latest)** encontra
 
 Los binarios publicados **siguen sin firma** hasta disponer de una firma de código válida. Preparar el proyecto para SignPath no significa que esté admitido ni que sus releases estén firmadas. En un equipo administrado, solicita aprobación si Windows bloquea la ejecución.
 
-El instalador usa `%LOCALAPPDATA%\QuotaDock`, crea un acceso en Inicio y registra la desinstalación por usuario. **Abrir QuotaDock al finalizar** está activado por defecto. Si Windows impide abrirlo, se informa de que está instalado pero bloqueado: eso no se confunde con un fallo de instalación. No descarga paquetes, no instala servicios y no necesita administrador. Si falla la instalación, intenta restaurar sus archivos y configuración anteriores. Cierra QuotaDock antes de actualizar.
+El instalador usa `%LOCALAPPDATA%\QuotaDock`, crea un acceso en Inicio y registra la desinstalación por usuario. **Abrir QuotaDock al finalizar** está activado por defecto. Si Windows impide abrirlo, se informa de que está instalado pero bloqueado: eso no se confunde con un fallo de instalación. No descarga paquetes, no instala servicios y no necesita administrador. Si falla la instalación, intenta restaurar sus archivos y configuración anteriores.
+
+### Buscar e instalar nuevas versiones (1.4.0)
+
+- **Clic derecho → Buscar actualizaciones…** consulta la última release estable oficial de GitHub. No se instalan versiones iguales, anteriores, borradores ni prereleases.
+- **Buscar nuevas versiones al iniciar**, activado por defecto y desactivable en el menú, comprueba una vez por arranque. Solo muestra un aviso si hay una versión nueva; no descarga ni instala por sí solo. Los fallos de red no interrumpen el inicio.
+- Al encontrar una versión nueva, la opción pasa a **Actualizar a …**. Siempre pide permiso antes de descargar y abrir el instalador; cancelar o responder «No» no modifica la instalación.
+- El instalador vuelve a pedir confirmación para sustituir una instalación existente. Después solicita el cierre ordenado de esa instancia, actualiza y vuelve a abrirla si está marcada la opción correspondiente. Conserva claves, proveedores, preferencias e inicio automático.
+- **Migración desde 1.3.0 y anteriores:** estas versiones no incorporan el nuevo cierre cooperativo ni el buscador de actualizaciones. La primera vez hay que descargar el nuevo instalador y cerrar la aplicación manualmente. No se fuerzan procesos ni se detienen copias portables.
+- **Modo portable:** el actualizador ofrece instalar para tu usuario y lo indica antes de descargar. No sobrescribe tu ejecutable portable; ciérralo antes de abrir la copia instalada. Puedes seguir actualizando el portable manualmente desde Releases.
+
+Se consulta `api.github.com` sin credenciales ni cookies, mediante un cliente separado de las consultas de cuota. Solo con permiso se descarga desde el repositorio oficial en `github.com`, aceptando redirecciones HTTPS únicamente a GitHub o `release-assets.githubusercontent.com`. Se validan tamaño, SHA-256 comunicado por GitHub y metadatos de producto/versión antes de abrir el instalador. **El hash no sustituye una firma digital ni garantiza la identidad del editor.** Las protecciones de Windows se respetan y no se solicita elevación de administrador.
+
+Los instaladores descargados se guardan en `%LOCALAPPDATA%\QuotaDock\Updates` en carpetas únicas; puedes eliminarlos con QuotaDock y sus instaladores cerrados. Las descargas fallidas se eliminan. Más información en [PRIVACY.md](PRIVACY.md).
 
 ## Primer uso
 
-1. Abre `QuotaDock.exe`. En una instalación nueva de 1.3.0 no se activa ningún proveedor hasta que tú lo elijas; una actualización conserva los que ya habías activado.
+1. Abre `QuotaDock.exe`. En una instalación nueva no se activa ningún proveedor hasta que tú lo elijas; una actualización conserva los que ya habías activado. La comprobación de nuevas versiones es independiente y se puede desactivar desde el menú.
 2. Clic derecho → **Proveedores** para activar los que utilices. Todos comparten un único icono. Si desactivas todos, ese mismo icono abre el menú para reactivarlos.
 3. Configura la sesión o clave de cada proveedor como se indica abajo.
 4. Si el icono está oculto en **^**, arrástralo junto al reloj.
@@ -122,7 +135,7 @@ Consulta la matriz de campos y fuentes en [PROVIDERS.md](PROVIDERS.md). El servi
 
 Activa **Iniciar con Windows** desde el menú o el instalador. Se usa únicamente `HKCU\…\Run\QuotaDock`. En modo portable apunta a la ruta actual: si mueves el ejecutable, desactiva y reactiva la opción desde su nueva ubicación.
 
-Las versiones nuevas conservan tus proveedores activados, claves cifradas y esperas. La primera vez eligen el primer proveedor activado; después recuerdan el que selecciones. Cierra la versión anterior antes de instalar para sustituir el ejecutable. No necesitas repetir el inicio de sesión salvo que haya caducado.
+Las versiones nuevas conservan tus proveedores activados, claves cifradas y esperas. La primera vez eligen el primer proveedor activado; después recuerdan el que selecciones. Desde 1.4.0 el instalador puede solicitar un cierre ordenado tras confirmación; si no es posible o vienes de una versión anterior, ciérrala manualmente. No necesitas repetir el inicio de sesión salvo que haya caducado.
 
 No se modifican ni borran los ejecutables independientes de 1.0.0 ni sus accesos de inicio. Si aún los usas, cierra sus iconos y retira sus accesos de `shell:startup` para evitar duplicar consultas.
 
@@ -146,7 +159,7 @@ En modo portable, desactiva primero el inicio automático, sal y borra el ejecut
 Requisitos: Windows 10/11 y .NET Framework 4.x; sin Python, Node, NuGet ni SDK moderno de .NET.
 
 ```powershell
-.\build.ps1          # dist\v1.3.0\QuotaDock.exe
+.\build.ps1          # dist\v1.4.0\QuotaDock.exe
 .\test.ps1           # pruebas sintéticas, HTTP simulado, DPAPI e instalación aislada
 .\release.ps1        # aplicación, instalador, ZIP y SHA-256
 .\package-test.ps1   # recursos del instalador y desinstalación en sandbox

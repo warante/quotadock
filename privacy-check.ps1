@@ -9,7 +9,7 @@ $patterns = @{
 }
 $sources = @(Get-ChildItem -LiteralPath $PSScriptRoot -Recurse -File -Force | Where-Object { $_.FullName -notmatch '[\\/](?:dist|\.git)[\\/]' } | Select-Object -ExpandProperty FullName)
 $files = $sources
-$release = Join-Path $PSScriptRoot 'dist\v1.3.0'
+$release = Join-Path $PSScriptRoot 'dist\v1.4.0'
 if (Test-Path $release) {
     $files += @(Get-ChildItem -LiteralPath $release -File | Where-Object { $_.Extension -ne '.zip' } | Select-Object -ExpandProperty FullName)
 }

@@ -28,6 +28,8 @@ Las claves privadas permanecen en el servicio de firma; nunca se añaden al repo
 
 ## Privacidad y cambios de sistema
 
+Desde 1.4.0 se puede consultar GitHub al iniciar (desactivable) o manualmente para detectar releases estables. Cada descarga/apertura del instalador y cada sustitución de una instalación existente requiere confirmación. El hash comunicado por GitHub y los metadatos del archivo no se presentan como una firma Authenticode ni sustituyen la admisión en SignPath. No se desactivan controles de Windows ni se solicita elevación para instalar por usuario. Consulta [las instrucciones de actualización](../README.md#buscar-e-instalar-nuevas-versiones-140).
+
 Consulta [Privacy policy](../PRIVACY.md): las consultas se realizan únicamente a los proveedores que el usuario activa. No hay telemetría ni envío de datos de uso al mantenedor o al servicio de firma. La instalación es por usuario, anuncia el inicio automático opcional y ofrece desinstalación. Las sesiones de otros clientes no se modifican.
 
 ## Solicitud y revisión

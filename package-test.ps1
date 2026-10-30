@@ -1,11 +1,11 @@
 $ErrorActionPreference = 'Stop'
-$release = Join-Path $PSScriptRoot 'dist\v1.3.0'
-$assembly = [Reflection.Assembly]::ReflectionOnlyLoadFrom((Join-Path $release 'QuotaDock-1.3.0-Setup.exe'))
+$release = Join-Path $PSScriptRoot 'dist\v1.4.0'
+$assembly = [Reflection.Assembly]::ReflectionOnlyLoadFrom((Join-Path $release 'QuotaDock-1.4.0-Setup.exe'))
 foreach ($name in @('QuotaDock.exe', 'Uninstall.ps1', 'LICENSE', 'PRIVACY.md')) {
     if ($assembly.GetManifestResourceNames() -notcontains $name) { throw "Missing installer resource: $name" }
 }
-if ((Get-Item (Join-Path $release 'QuotaDock.exe')).VersionInfo.FileVersion -ne '1.3.0.0') { throw 'Incorrect application version' }
-if ((Get-Item (Join-Path $release 'QuotaDock-1.3.0-Setup.exe')).VersionInfo.FileVersion -ne '1.3.0.0') { throw 'Incorrect installer version' }
+if ((Get-Item (Join-Path $release 'QuotaDock.exe')).VersionInfo.FileVersion -ne '1.4.0.0') { throw 'Incorrect application version' }
+if ((Get-Item (Join-Path $release 'QuotaDock-1.4.0-Setup.exe')).VersionInfo.FileVersion -ne '1.4.0.0') { throw 'Incorrect installer version' }
 $base = Join-Path $env:TEMP 'opencode'
 if (!(Test-Path $base)) { $base = $env:TEMP }
 $sandbox = Join-Path $base ('quotadock-install-test-' + [Guid]::NewGuid().ToString('N'))

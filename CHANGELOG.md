@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.4.0 — 2026-10-31 (hora peninsular española)
+
+- Menú de búsqueda de actualizaciones de la aplicación, separado de «Actualizar cuotas».
+- Comprobación de releases estables de GitHub una vez al iniciar, desactivable, con aviso discreto y sin instalación automática.
+- Confirmación obligatoria antes de descargar y abrir el instalador y antes de sustituir una instalación existente.
+- Validación de origen, redirecciones HTTPS restringidas, tamaño, SHA-256 y metadatos de producto/versión; sin credenciales ni cookies de proveedores.
+- Cierre cooperativo de la instancia instalada, conservación de preferencias y reinicio opcional. Las copias portables no se sobrescriben ni se cierran; las versiones antiguas requieren cierre manual.
+- Política de privacidad actualizada con los destinos de GitHub y la carpeta de descargas. Los binarios siguen sin firma digital.
+
 ## 1.3.0 — 2026-10-30 (hora peninsular española)
 
 - Reinicio minimalista junto al porcentaje: `26% | 21:16 ⓘ` en 5 horas y `80% | 04/11 ⓘ` en la semanal, con tooltip completo solo sobre el icono de información y sin segunda línea.
