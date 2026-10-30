@@ -8,7 +8,7 @@ Tus cuotas de IA junto al reloj, sin llenar la bandeja de iconos. Pulsa para cam
 
 **Windows 10/11 · MIT · Portable o instalable · Sin administrador**
 
-Rama de desarrollo: **1.3.0**, con consulta de restablecimientos. La última versión publicada está en **Releases**; las funcionalidades nuevas de `main` no se deben atribuir a una release anterior.
+**Versión 1.3.0**, con restablecimientos compactos e iconos de información. Descarga la versión publicada en **[Releases](https://github.com/warante/quotadock/releases/latest)**; `main` puede incorporar cambios posteriores.
 
 <p align="center">
   <img src="docs/images/quotadock-preview.png" alt="QuotaDock con un único icono junto al reloj y pestañas para cambiar entre OpenAI, Claude y Kimi" width="880">
@@ -41,7 +41,7 @@ También puedes cambiar desde **clic derecho → Proveedor visible**. Las flecha
 
 ## Descargar
 
-En **[Releases](https://github.com/warante/quotadock/releases/latest)** encontrarás la última versión publicada. Al compilar `main`, los artefactos de desarrollo se generan en `dist\v1.3.0`:
+En **[Releases](https://github.com/warante/quotadock/releases/latest)** encontrarás la última versión publicada. Los scripts de 1.3.0 generan sus artefactos en `dist\v1.3.0`:
 
 | Artefacto | Uso |
 | --- | --- |
