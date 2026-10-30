@@ -18,4 +18,6 @@ Son prioritarios: envío de credenciales a destinos incorrectos, exposición de 
 
 DPAPI protege las claves guardadas para tu usuario; no protege contra otro programa que ya controle esa misma cuenta. Los endpoints de cuota pueden fallar, restringir acceso o cambiar. La ausencia de firma no se debe ocultar ni compensar desactivando protecciones de Windows.
 
+Desde 1.4.0, el actualizador consulta exclusivamente la release estable del repositorio oficial y requiere confirmación antes de descargar/abrir el instalador. Una instalación existente requiere una segunda confirmación antes de sustituirse. El tamaño, SHA-256 comunicado por GitHub y metadatos de producto/versión detectan inconsistencias, pero **no equivalen a una firma de editor**: dependen de la integridad de GitHub y del repositorio. El cliente no envía credenciales ni cookies y restringe las redirecciones de descarga a hosts HTTPS de GitHub. El cierre cooperativo solo se solicita para la ruta instalada del usuario; no se terminan procesos a la fuerza ni se solicita elevación. Los cambios en estos controles y cualquier instalación sin consentimiento son prioritarios para revisión de seguridad.
+
 Consulta [PRIVACY.md](PRIVACY.md) y [Code signing policy](docs/code-signing-policy.md).

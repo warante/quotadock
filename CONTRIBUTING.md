@@ -27,6 +27,7 @@ Utiliza el correo `noreply` de GitHub en los commits si no quieres publicar tu d
 - Un timestamp sin hora o sin zona no autoriza a inventarlas. Las horas mostradas deben usar `Europe/Madrid`, incluidos los cambios CET/CEST.
 - No extraigas cookies de navegadores ni renueves por tu cuenta tokens rotatorios que pertenecen a otro cliente.
 - Revisa especialmente los workflows, scripts de compilación, el instalador, la desinstalación y cualquier cambio de destinos de red.
+- Las actualizaciones de la aplicación siempre requieren confirmación antes de descargar/abrir el instalador y antes de sustituir una instalación existente. No reutilices el cliente HTTP ni las credenciales de los proveedores para consultar GitHub. Las pruebas de actualización deben usar respuestas simuladas y procesos aislados, nunca descargar o ejecutar una actualización real sin permiso.
 
 ## Licencia y procedencia
 
