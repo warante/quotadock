@@ -2,7 +2,9 @@
 
 ## 1.3.0 — en desarrollo
 
-- Consulta de restablecimientos por cuota al pasar el ratón y desde el menú, sin recargar el panel.
+- Reinicio minimalista junto al porcentaje: `26% | 21:16 ⓘ` en 5 horas y `80% | 04/11 ⓘ` en la semanal, con tooltip completo solo sobre el icono de información y sin segunda línea.
+
+- Consulta de restablecimientos por cuota junto al porcentaje y desde el menú, sin recargar el panel.
 - Conversión a hora peninsular española con CET/CEST, fechas parciales explícitas y rechazo de datos inválidos, ambiguos o antiguos.
 - Licencia MIT, documentación de privacidad, contribuciones, seguridad y política de firma; solicitud a SignPath preparada, no concedida.
 - Instalación nueva sin consultas hasta activar un proveedor; las actualizaciones conservan las preferencias.

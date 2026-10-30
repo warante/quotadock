@@ -54,6 +54,12 @@ La investigación se apoya en los contratos oficiales y referencias comunitarias
 
 Las horas válidas se presentan en hora peninsular española (`Europe/Madrid`, CET/CEST). Las fechas sin hora o zona se conservan como tales. Un reinicio ya pasado se presenta como dato anterior, no como el próximo.
 
+### Presentación compacta
+
+La fila de sesión muestra `porcentaje | HH:mm ⓘ`; la semanal y las demás ventanas muestran `porcentaje | dd/MM ⓘ`. El icono `ⓘ`, no la barra completa, abre al pasar el ratón el detalle con fecha, hora y zona cuando estén disponibles. El menú de restablecimientos conserva ese mismo detalle.
+
+`—` significa reinicio ausente, inválido o vencido, no cuota agotada. Una fecha sin hora nunca se transforma en una hora de sesión; el detalle conserva la fecha comunicada. `≈` identifica las horas aproximadas calculadas a partir de segundos restantes. Las fechas sin zona no se convierten como si fueran timestamps de Madrid.
+
 ## Evaluados y no habilitados
 
 | Proveedor | Motivo |

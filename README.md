@@ -19,7 +19,7 @@ Rama de desarrollo: **1.3.0**, con consulta de restablecimientos. La última ver
 ## Un solo icono, todos tus proveedores
 
 <p align="center">
-  <img src="docs/images/provider-selector.png" alt="Selector de proveedores de QuotaDock: pestañas y dos barras del proveedor seleccionado" width="580">
+  <img src="docs/images/provider-selector.png" alt="Selector de QuotaDock con dos barras, hora y día de reinicio junto al porcentaje e iconos de información" width="580">
 </p>
 
 1. **Pulsa el icono** para abrir las dos barras y las pestañas.
@@ -36,7 +36,7 @@ También puedes cambiar desde **clic derecho → Proveedor visible**. Las flecha
 - **Identificación:** banda de color por proveedor y nombre en el tooltip y el menú.
 - **Diseño moderno y ligero:** panel redondeado, pestañas con estados de foco y hover, tipografía Segoe UI, barras suaves y menú oscuro. Dibujo nativo con GDI+, sin navegador integrado, librerías externas ni bucles de animación. Respeta el alto contraste de Windows.
 - **Avisos opcionales:** umbral de 5%, 10%, 20% o 25%, desactivados por defecto; no repiten el aviso mientras la cuota siga baja.
-- **Restablecimientos:** pasa el ratón sobre una barra o abre el menú **Restablecimientos** para consultar la hora que devuelve el proveedor. Se muestra en hora peninsular española, con CET/CEST automático, sin inventar fechas.
+- **Restablecimientos:** junto al porcentaje, solo la hora en la ventana de 5 horas (`26% | 21:16 ⓘ`) o el día/mes en la semanal (`80% | 04/11 ⓘ`). El icono `ⓘ` muestra el detalle al pasar el ratón.
 - **Más proveedores:** OpenCode Go, Kimi, MiniMax, Z.AI/Zhipu, Copilot y Gemini CLI, además de Codex y Claude.
 
 ## Descargar
@@ -107,12 +107,14 @@ Los ajustes no secretos se guardan en `%APPDATA%\QuotaDock\settings.json`, y la 
 
 ### Hora de restablecimiento
 
-Las dos barras siguen sin texto adicional permanente. En 1.3.0, posa el ratón sobre la fila de una cuota o entra en **clic derecho → Restablecimientos · hora peninsular**. La información se actualiza al consultar el proveedor; no hay un temporizador de cuenta atrás.
+Junto al porcentaje de **5 horas** se muestra únicamente la **hora de reinicio**, por ejemplo `26% | 21:16 ⓘ`. En la **semanal**, únicamente **día/mes**, por ejemplo `80% | 04/11 ⓘ`. Se usa hora peninsular española con cambio automático CET/CEST, sin añadir texto bajo las barras. Solo al pasar el ratón sobre `ⓘ` aparece el tooltip con fecha, hora y zona completas. Si falta el dato o ha vencido se muestra `—`, y el tooltip explica la situación. Para otras ventanas se muestra el día/mes disponible; `≈` identifica una hora aproximada.
+
+El menú **clic derecho → Restablecimientos · hora peninsular** conserva el detalle completo. La información se actualiza al consultar el proveedor; no hay un temporizador de cuenta atrás.
 
 - Los timestamps absolutos se convierten a `Europe/Madrid`, incluidos los cambios CET/CEST y la hora repetida de octubre.
 - Si solo hay segundos restantes, se anclan a la recepción de la respuesta y se etiquetan como **aproximados**.
 - Una fecha sin hora, como las que puede devolver Copilot, se mantiene como fecha comunicada, sin asumir medianoche ni una zona horaria.
-- Los reinicios pasados se marcan como pendientes de actualizar. Datos ausentes, unidades inválidas o varios reinicios incompatibles dentro de una familia no generan una hora ficticia.
+- Los reinicios pasados se muestran como `—`; su detalle indica que están pendientes de actualizar. Datos ausentes, unidades inválidas o varios reinicios incompatibles dentro de una familia no generan una hora ficticia.
 
 Consulta la matriz de campos y fuentes en [PROVIDERS.md](PROVIDERS.md). El servidor puede modificar sus límites; una hora comunicada no es una garantía de disponibilidad futura.
 
