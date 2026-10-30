@@ -7,6 +7,13 @@ internal static class ResetTests
     public static void Run(Action<bool, string> check)
     {
         var now = DateTimeOffset.Parse("2026-01-01T00:00:00Z");
+        check(ResetInfo.Compact(ResetInfo.Iso("2026-01-01T10:30:00Z"), true, now) == "11:30", "Inline session time uses Madrid");
+        check(ResetInfo.Compact(ResetInfo.Iso("2026-06-12T10:30:00Z"), true, now) == "12:30", "Inline session shows only summer time");
+        check(ResetInfo.Compact(null, true, now) == "—", "Inline missing reset");
+        check(ResetInfo.Compact(ResetInfo.Iso("2025-12-31T10:30:00Z"), false, now) == "—", "Inline expired reset");
+        check(ResetInfo.Compact(ResetInfo.Iso("2026-06-12"), true, now) == "—", "Inline date-only reset never invents time");
+        check(ResetInfo.Compact(ResetInfo.After(3600, now), true, now).Contains("≈"), "Inline relative reset marked approximate");
+        check(ResetInfo.Compact(ResetInfo.Iso("2026-01-01T23:30:00Z"), false, now) == "02/01", "Inline weekly date uses Madrid day");
         var epoch = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
         var target = DateTimeOffset.Parse("2030-06-12T10:30:00Z");
         long seconds = (long)(target - epoch).TotalSeconds;

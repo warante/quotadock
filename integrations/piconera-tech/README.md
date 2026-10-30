@@ -34,6 +34,21 @@ La descripción y los atributos ARIA deben cambiar al cambiar el idioma. La band
 
 Abre `preview.html` para revisar la ficha antes de integrarla. La vista local usa fuentes del sistema; al integrarse hereda Outfit y el resto del diseño de Piconera Tech.
 
+### Regenerar las imágenes tras un cambio de interfaz
+
+Los banners ES/EN y la imagen social incluyen el mismo panel nativo de demostración que el README. La vista actual muestra reinicios compactos junto al porcentaje y el icono `ⓘ`; no utiliza respuestas de cuentas reales. Regenera primero las capturas y después los banners, sin cambiar los textos traducidos existentes:
+
+```powershell
+.\test.ps1
+Copy-Item .\dist\tests\provider-selector.png .\docs\images\provider-selector.png -Force
+Copy-Item .\dist\tests\quotadock-preview.png .\docs\images\quotadock-preview.png -Force
+.\integrations\piconera-tech\render.ps1
+.\integrations\piconera-tech\test.ps1
+.\integrations\piconera-tech\package.ps1
+```
+
+Ejecuta estos comandos desde la raíz del repositorio y continúa solo si las pruebas visuales han terminado correctamente. Si Windows las bloquea, no sustituyas las capturas por archivos antiguos ni desactives las protecciones.
+
 `test.ps1` valida las rutas, dimensiones y claves de traducción. `package.ps1` genera un ZIP autocontenido en `dist/integrations`. `browser-test.yml` recoge la prueba ES → EN → ES para Maestro con la variable `PREVIEW_URL`, apuntando a un servidor local de esta carpeta. El flujo se ha probado en Chromium; no debe confundirse con una prueba de la web publicada, que no se ha modificado.
 
 ## Honestidad visual y privacidad

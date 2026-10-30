@@ -4,8 +4,8 @@
 
 - [x] Revisar los campos por proveedor; matriz y fuentes en `PROVIDERS.md`.
 - [x] Distinguir timestamps, segundos restantes, fechas sin hora y agregados ambiguos, sin inventar un reinicio.
-- [x] Implementar tooltip por cuota y menú de restablecimientos, sin texto permanente adicional.
-- [x] Mostrar horas en `Europe/Madrid`, con CET/CEST y zona explícita.
+- [x] Mostrar reinicio compacto junto al porcentaje: `26% | 21:16 ⓘ` para 5 horas y `80% | 04/11 ⓘ` para la semana. El tooltip completo aparece solo sobre `ⓘ`; se conserva el menú de restablecimientos.
+- [x] Convertir horas a `Europe/Madrid`, con CET/CEST automático y zona explícita en el detalle de información.
 - [x] Añadir pruebas de datos ausentes, unidades, fechas inválidas, ambos cambios de horario y reinicios pasados.
 
 ## 2. Preparar el proyecto para open source y solicitar firma gratuita

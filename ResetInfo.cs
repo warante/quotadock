@@ -45,6 +45,19 @@ namespace UsageTray
         {
             return Iso(Json.Get(bucket, "resetTime") ?? Json.Get(bucket, "resetAt") ?? Json.Get(bucket, "reset_at") ?? Json.Get(bucket, "reset_time"));
         }
+        public static string Compact(ResetInfo reset, bool showTime, DateTimeOffset now)
+        {
+            if (reset == null) return "—";
+            var today = TimeZoneInfo.ConvertTime(now, Madrid).Date;
+            if (reset.At.HasValue)
+            {
+                if (reset.At.Value <= now) return "—";
+                var local = TimeZoneInfo.ConvertTime(reset.At.Value, Madrid);
+                return (reset.Relative ? "≈" : "") + local.ToString(showTime ? "HH:mm" : "dd/MM", CultureInfo.InvariantCulture);
+            }
+            if (reset.DateOnly.Value < today || showTime) return "—";
+            return reset.DateOnly.Value.ToString("dd/MM", CultureInfo.InvariantCulture);
+        }
         public static string Describe(ResetInfo reset, DateTimeOffset now)
         {
             if (reset == null) return "El proveedor no comunica una hora de reinicio válida.";
