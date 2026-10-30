@@ -44,9 +44,9 @@ jobs:
         run: .\integrations\piconera-tech\test.ps1
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: QuotaDock-1.3.0-Windows-unsigned
+          name: QuotaDock-1.4.0-Windows-unsigned
           path: |
-            dist/v1.3.0/QuotaDock-1.3.0-Setup.exe
-            dist/v1.3.0/QuotaDock-1.3.0-Windows-Portable.zip
-            dist/v1.3.0/QuotaDock.exe
-            dist/v1.3.0/SHA256SUMS.txt
+            dist/v1.4.0/QuotaDock-1.4.0-Setup.exe
+            dist/v1.4.0/QuotaDock-1.4.0-Windows-Portable.zip
+            dist/v1.4.0/QuotaDock.exe
+            dist/v1.4.0/SHA256SUMS.txt

@@ -2,7 +2,7 @@ param([switch]$RequireSigned, [switch]$UseExistingApp, [switch]$SkipLocalSigning
 $ErrorActionPreference = 'Stop'
 if ($RequireSigned -and $SkipLocalSigning) { throw 'Use package.ps1 -RequireSigned after the external signing stages.' }
 if (!$UseExistingApp) { & (Join-Path $PSScriptRoot 'build.ps1') }
-$version = '1.3.0'
+$version = '1.4.0'
 $output = Join-Path $PSScriptRoot "dist\v$version"
 $appInfo = (Get-Item -LiteralPath "$output\QuotaDock.exe").VersionInfo
 if ($appInfo.FileVersion -ne "$version.0" -or $appInfo.ProductName -ne 'QuotaDock' -or $appInfo.ProductVersion -ne $version) { throw 'Existing application metadata does not match this release.' }

@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using UsageTray;
 
@@ -13,7 +14,7 @@ internal sealed class Installer : Form
     private readonly Button install = new Button { Text = "Instalar", Left = 245, Top = 215, Width = 110, Height = 32 };
     private Installer()
     {
-        Text = "QuotaDock 1.3.0"; ClientSize = new Size(390, 270);
+        Text = "QuotaDock 1.4.0"; ClientSize = new Size(390, 270);
         FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false;
         StartPosition = FormStartPosition.CenterScreen; Font = new Font("Segoe UI", 9);
         Controls.Add(new Label { Text = "Un icono, dos barras y todos tus proveedores.\nInstalación por usuario en %LOCALAPPDATA%\\QuotaDock.\nSolo consulta los proveedores que actives. Sin telemetría.", Left = 24, Top = 16, Width = 350, Height = 70 });
@@ -28,11 +29,25 @@ internal sealed class Installer : Form
         };
         Controls.Add(policies);
         Controls.AddRange(new Control[] { startup, launch, install });
-        install.Click += delegate {
+        FormClosing += delegate(object sender, FormClosingEventArgs e) { if (!install.Enabled) e.Cancel = true; };
+        string installRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "QuotaDock");
+        if (File.Exists(Path.Combine(installRoot, "QuotaDock.exe")))
+        {
+            install.Text = "Actualizar";
+            try { startup.Checked = new WindowsInstallPlatform().Startup == "\"" + Path.Combine(installRoot, "QuotaDock.exe") + "\""; } catch { }
+        }
+        install.Click += async delegate {
             install.Enabled = false;
-            string root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "QuotaDock");
+            string root = installRoot;
             try
             {
+                if (File.Exists(Path.Combine(root, "QuotaDock.exe")))
+                {
+                    if (MessageBox.Show("¿Actualizar QuotaDock? Se cerrará únicamente la instancia instalada para tu usuario, si está abierta. Se conservarán tus claves, proveedores y ajustes.\n\nNo se modifican copias portables ni sesiones de otros clientes.", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
+                    { install.Enabled = true; return; }
+                    if (!await Task.Run(() => InstalledInstance.RequestClose(Path.Combine(root, "QuotaDock.exe"))))
+                    { MessageBox.Show("No se ha podido cerrar la versión anterior de forma segura. Cierra QuotaDock manualmente y vuelve a pulsar Actualizar. No se han sustituido archivos.", Text); install.Enabled = true; return; }
+                }
                 string programs = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), "QuotaDock");
                 string powershell = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WindowsPowerShell", "v1.0", "powershell.exe");
                 new InstallEngine(new WindowsInstallPlatform()).Install(root, programs, startup.Checked, powershell, Resource);
@@ -52,13 +67,13 @@ internal sealed class Installer : Form
                         "QuotaDock está instalado, pero Windows ha bloqueado su ejecución por una política de control de aplicaciones o de firma.\n\nNo es un error de copia de archivos. Los ejecutables actuales no están firmados. Solicita aprobación al administrador o utiliza una distribución firmada admitida por tu equipo. No desactives las protecciones.\n\nEl acceso de QuotaDock está disponible en el menú Inicio." :
                         "QuotaDock está instalado, pero no se pudo abrir automáticamente. Prueba el acceso QuotaDock del menú Inicio para ver si Windows muestra un bloqueo o algún otro error.",
                         Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    Close(); return;
+                    install.Enabled = true; Close(); return;
                 }
             }
             MessageBox.Show(launch.Checked ?
                 "QuotaDock instalado y abierto. Busca sus dos barras junto al reloj o en la flecha ^ de iconos ocultos.\n\nSi usabas la versión 1.0, sal de sus iconos y retira sus antiguos accesos de inicio. No se han modificado tus sesiones ni esas copias portables." :
                 "QuotaDock instalado. Ábrelo desde el menú Inicio cuando quieras.\n\nSi usabas la versión 1.0, sal de sus iconos y retira sus antiguos accesos de inicio.", Text);
-            Close();
+            install.Enabled = true; Close();
         };
     }
     private static byte[] Resource(string name)
