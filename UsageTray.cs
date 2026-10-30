@@ -23,18 +23,29 @@ namespace UsageTray
         private string[] providerIds = new string[0];
         private readonly Font bodyFont = new Font("Segoe UI", 9.5f);
         private readonly Font valueFont = new Font("Segoe UI Semibold", 10);
-        private readonly ToolTip resetTip = new ToolTip { InitialDelay = 350, ReshowDelay = 100, AutoPopDelay = 15000, ShowAlways = true };
-        private string resetTipText;
+        private readonly ToolTip infoTip = new ToolTip { InitialDelay = 300, ReshowDelay = 100, AutoPopDelay = 15000, ShowAlways = true };
+        private readonly Label[] infoIcons = new Label[2];
+        internal const int RowHeight = 34;
         public int BarsTop { get; private set; }
         public BarsPopup()
         {
             FormBorderStyle = FormBorderStyle.None; ShowInTaskbar = false; TopMost = true;
-            StartPosition = FormStartPosition.Manual; ClientSize = new Size(410, 130);
+            StartPosition = FormStartPosition.Manual; ClientSize = new Size(410, 140);
             BackColor = Ui.Panel; DoubleBuffered = true; Font = bodyFont;
             KeyPreview = true;
             tabs.Location = new Point(14, 14); tabs.Width = 382;
             tabs.WrapContents = true; tabs.FlowDirection = FlowDirection.LeftToRight;
             Controls.Add(tabs); BarsTop = 64;
+            for (int i = 0; i < infoIcons.Length; i++)
+            {
+                int index = i;
+                var icon = new Label { Text = "ⓘ", ForeColor = Ui.Muted, BackColor = Ui.Panel,
+                    TextAlign = ContentAlignment.MiddleCenter, Size = new Size(22, 24),
+                    AccessibleName = "Información del reinicio", Cursor = Cursors.Help };
+                infoIcons[i] = icon; Controls.Add(icon);
+                icon.MouseEnter += delegate { infoTip.SetToolTip(icon, InfoTooltipText(index, DateTimeOffset.UtcNow)); };
+            }
+            PositionInfoIcons();
             Deactivate += delegate { Hide(); };
             KeyDown += delegate(object sender, KeyEventArgs e) { if (e.KeyCode == Keys.Escape) Hide(); };
         }
@@ -56,6 +67,7 @@ namespace UsageTray
             int rows = Math.Max(1, (providers.Length + 2) / 3);
             tabs.Height = rows * 40; BarsTop = tabs.Bottom + 21;
             ClientSize = new Size(410, BarsTop + 76);
+            PositionInfoIcons();
             tabs.ResumeLayout(); UpdateTabs(); Invalidate();
         }
         private static string TabLabel(ProviderDefinition p)
@@ -86,23 +98,23 @@ namespace UsageTray
         }
         public void UpdateData(Meter[] data, Color accent, string id)
         {
-            resetTip.Hide(this); resetTipText = null;
+            foreach (var icon in infoIcons) { infoTip.Hide(icon); infoTip.SetToolTip(icon, null); }
             Data = data; Accent = accent; ProviderId = id; UpdateTabs(); Invalidate();
         }
-        internal string ResetTooltipAt(Point point, DateTimeOffset now)
+        private void PositionInfoIcons()
         {
-            for (int i = 0; i < 2; i++)
-                if (new Rectangle(12, BarsTop - 3 + 34 * i, Width - 24, 28).Contains(point))
-                    return Data[i].Label + " · " + ResetInfo.Describe(Data[i].Remaining.HasValue ? Data[i].Reset : null, now);
-            return null;
+            for (int i = 0; i < infoIcons.Length; i++) infoIcons[i].Location = new Point(379, BarsTop - 3 + RowHeight * i);
         }
-        protected override void OnMouseMove(MouseEventArgs e)
+        internal string InfoTooltipText(int index, DateTimeOffset now)
         {
-            base.OnMouseMove(e);
-            string text = ResetTooltipAt(e.Location, DateTimeOffset.UtcNow);
-            if (text != resetTipText) { resetTipText = text; resetTip.SetToolTip(this, text); }
+            var meter = Data[index];
+            return meter.Label + " · " + ResetInfo.Describe(meter.Remaining.HasValue ? meter.Reset : null, now);
         }
-        protected override void OnMouseLeave(EventArgs e) { resetTip.Hide(this); resetTipText = null; base.OnMouseLeave(e); }
+        internal string ValueLabel(int index, DateTimeOffset now)
+        {
+            var meter = Data[index];
+            return Visuals.Percent(meter.Remaining) + " | " + ResetInfo.Compact(meter.Remaining.HasValue ? meter.Reset : null, meter.Id == "session", now);
+        }
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             if ((keyData == Keys.Left || keyData == Keys.Right) && providerIds.Length > 1)
@@ -120,11 +132,12 @@ namespace UsageTray
             var g = e.Graphics; g.SmoothingMode = SmoothingMode.AntiAlias;
             using (var divider = new Pen(Ui.Border)) g.DrawLine(divider, 20, BarsTop - 12, Width - 20, BarsTop - 12);
             Ui.Outline(g, Ui.Border, new RectangleF(.5f, .5f, Width - 1, Height - 1), 13);
+            var now = DateTimeOffset.UtcNow;
             for (int i = 0; i < 2; i++)
             {
-                int y = BarsTop + 34 * i;
+                int y = BarsTop + RowHeight * i;
                 TextRenderer.DrawText(g, Data[i].Label, bodyFont, new Rectangle(21, y - 2, 94, 23), Ui.Muted, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
-                var track = new RectangleF(120, y + 5, 200, 8);
+                var track = new RectangleF(120, y + 5, 120, 8);
                 Ui.Fill(g, Ui.Track, track, 4);
                 if (Data[i].Remaining.HasValue && Data[i].Remaining.Value > 0)
                 {
@@ -135,7 +148,7 @@ namespace UsageTray
                     g.Restore(saved);
                 }
                 Color number = !SystemInformation.HighContrast && Data[i].Remaining <= 10 ? Visuals.BarColor(Data[i].Remaining) : Ui.Text;
-                TextRenderer.DrawText(g, Visuals.Percent(Data[i].Remaining), valueFont, new Rectangle(335, y - 3, 54, 24), number, TextFormatFlags.Right | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, ValueLabel(i, now), valueFont, new Rectangle(250, y - 3, 124, 24), number, TextFormatFlags.Right | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
             }
         }
         protected override CreateParams CreateParams
@@ -154,7 +167,7 @@ namespace UsageTray
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            if (disposing) { resetTip.Dispose(); bodyFont.Dispose(); valueFont.Dispose(); }
+            if (disposing) { infoTip.Dispose(); bodyFont.Dispose(); valueFont.Dispose(); }
         }
         public void Toggle(Meter[] data, Color accent, string id)
         {

@@ -24,12 +24,19 @@ internal static class VisualTests
                 popup.SetProviders(new[] { Providers.Find("openai"), Providers.Find("claude"), Providers.Find("kimi") });
                 var original = new[] { new Meter("session", "5 h", 81), new Meter("weekly", "Semana", 9) };
                 popup.UpdateData(original, Color.MediumSeaGreen, "openai");
-                var tooltipNow = DateTimeOffset.Parse("2026-01-01T00:00:00Z");
+                var labelNow = DateTimeOffset.Parse("2026-01-01T00:00:00Z");
                 popup.Data[0].Reset = ResetInfo.Iso("2030-06-12T10:30:00Z");
-                if (!popup.ResetTooltipAt(new Point(150, popup.BarsTop + 8), tooltipNow).Contains("12/06/2030 12:30 CEST")) throw new Exception("Reset tooltip must use Madrid time");
-                if (popup.ResetTooltipAt(new Point(150, 1), tooltipNow) != null) throw new Exception("Reset tooltip must only describe a quota row");
+                if (popup.ValueLabel(0, labelNow) != "81% | 12:30") throw new Exception("Session row must display percentage and time only");
+                popup.Data[1].Reset = ResetInfo.Iso("2030-06-12T10:30:00Z");
+                if (popup.ValueLabel(1, labelNow) != "9% | 12/06") throw new Exception("Weekly row must display percentage and day/month only");
+                var infoIcons = popup.Controls.OfType<Label>().Where(l => l.Text == "ⓘ").OrderBy(l => l.Top).ToArray();
+                if (infoIcons.Length != 2 || infoIcons[0].Left <= 374 || infoIcons[1].Top != popup.BarsTop - 3 + BarsPopup.RowHeight) throw new Exception("Each row must have a separate info icon after the value");
+                if (!popup.InfoTooltipText(0, labelNow).Contains("12/06/2030 12:30 CEST") || !popup.InfoTooltipText(1, labelNow).Contains("hora peninsular española")) throw new Exception("Info tooltip must include exact Madrid date, time and zone");
+                using (var font = new Font("Segoe UI Semibold", 10))
+                    if (TextRenderer.MeasureText("100% | ≈23:59", font, Size.Empty, TextFormatFlags.NoPadding).Width > 124) throw new Exception("Inline values must fit without clipping");
                 popup.Data[0].Remaining = null;
-                if (!popup.ResetTooltipAt(new Point(150, popup.BarsTop + 8), tooltipNow).Contains("no comunica")) throw new Exception("Unknown usage must not retain a stale reset tooltip");
+                if (popup.ValueLabel(0, labelNow) != "—% | —") throw new Exception("Unknown quota must not show stale reset time");
+                if (!popup.InfoTooltipText(0, labelNow).Contains("no comunica")) throw new Exception("Info tooltip must not show stale reset for missing usage");
                 popup.Data[0].Remaining = 81;
                 bool switched = false;
                 popup.ProviderSelected += id => {
@@ -46,7 +53,7 @@ internal static class VisualTests
                 {
                     popup.DrawToBitmap(bitmap, new Rectangle(Point.Empty, popup.ClientSize));
                     if (bitmap.GetPixel(124, popup.BarsTop + 9).G <= bitmap.GetPixel(124, popup.BarsTop + 9).R) throw new Exception("First bar not green");
-                    if (bitmap.GetPixel(124, popup.BarsTop + 43).R <= bitmap.GetPixel(124, popup.BarsTop + 43).G) throw new Exception("Second bar not red");
+                    if (bitmap.GetPixel(124, popup.BarsTop + BarsPopup.RowHeight + 9).R <= bitmap.GetPixel(124, popup.BarsTop + BarsPopup.RowHeight + 9).G) throw new Exception("Second bar not red");
                     bitmap.Save(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "preview.png"), System.Drawing.Imaging.ImageFormat.Png);
                 }
                 SavePreviews(popup);
@@ -95,7 +102,10 @@ internal static class VisualTests
     private static void SavePreviews(BarsPopup popup)
     {
         var provider = Providers.Find("claude");
-        popup.UpdateData(new[] { new Meter("session", "5 h", 7), new Meter("weekly", "Semana", 58) }, provider.Accent, provider.Id);
+        popup.UpdateData(new[] {
+            new Meter("session", "5 h", 7, ResetInfo.Iso("2030-11-01T20:16:00Z")),
+            new Meter("weekly", "Semana", 58, ResetInfo.Iso("2030-11-04T10:00:00Z"))
+        }, provider.Accent, provider.Id);
         using (var panel = new Bitmap(popup.ClientSize.Width, popup.ClientSize.Height))
         {
             popup.DrawToBitmap(panel, new Rectangle(Point.Empty, popup.ClientSize));
