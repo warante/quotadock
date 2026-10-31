@@ -42,4 +42,4 @@ Objetivo: estudiar la admisión en **SignPath Foundation**, no generar un certif
 - [x] Validar destino HTTPS, tamaño, SHA-256 y metadatos; cliente sin credenciales ni cookies de proveedores.
 - [x] Permitir cierre ordenado de la instancia instalada tras confirmación, sin terminar procesos a la fuerza ni cerrar copias portables.
 - [x] Probar versiones, errores, redirecciones, descargas corruptas y cierre cooperativo con datos/procesos aislados.
-- [ ] Publicación de 1.4.0 autorizada: pendiente de PR, CI, fusión y verificación final de la release. Para migrar desde 1.3.0 hay que cerrar y actualizar manualmente una primera vez.
+- [x] Publicar [1.4.0](https://github.com/warante/quotadock/releases/tag/v1.4.0) tras el [PR #2](https://github.com/warante/quotadock/pull/2), CI correcta en la propuesta y en `main`, fusión y verificación de los hashes remotos y la codificación de las notas. Para migrar desde 1.3.0 hay que cerrar y actualizar manualmente una primera vez.
