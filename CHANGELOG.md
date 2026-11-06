@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.1 — 2026-11-06 (hora peninsular española)
+
+- Opción visible en el instalador para desactivar las comprobaciones automáticas de GitHub antes del primer arranque, con información sobre IP y versión enviadas.
+- Conservación del resto de ajustes al guardar esa elección y restauración del archivo original si falla la instalación.
+- Preparación de la solicitud a SignPath revisada; el propietario todavía debe confirmar MFA y enviar la solicitud. No hay admisión ni certificado concedido.
+
 ## 1.4.0 — 2026-10-31 (hora peninsular española)
 
 - Menú de búsqueda de actualizaciones de la aplicación, separado de «Actualizar cuotas».
