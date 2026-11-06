@@ -40,7 +40,7 @@ internal static class InstallationTests
             Func<string, byte[]> resources = name => System.Text.Encoding.UTF8.GetBytes(name);
             platform.Files[Path.Combine(root, "unrelated.txt")] = new byte[] { 123 };
             engine.Install(root, programs, true, "powershell", resources);
-            Check(platform.Files.Count == 7 && platform.Startup == "\"" + Path.Combine(root, "QuotaDock.exe") + "\"" && (string)platform.Registration["DisplayVersion"] == "1.4.0");
+            Check(platform.Files.Count == 7 && platform.Startup == "\"" + Path.Combine(root, "QuotaDock.exe") + "\"" && (string)platform.Registration["DisplayVersion"] == "1.4.1");
             engine.Install(root, programs, false, "powershell", resources); Check(platform.Files.Count == 7 && platform.Startup == null);
             var before = platform.Files.ToDictionary(x => x.Key, x => x.Value);
             platform.Startup = "previous-portable-app";
@@ -51,6 +51,28 @@ internal static class InstallationTests
             var clean = new Sandbox { FailShortcut = true };
             try { new InstallEngine(clean).Install(root, programs, true, "powershell", resources); } catch (IOException) { }
             Check(clean.Files.Count == 0 && clean.Startup == null && clean.Registration == null);
+            string settingsPath = Path.Combine("sandbox", "Profile", "settings.json");
+            var options = new Sandbox();
+            var optionsEngine = new InstallEngine(options);
+            optionsEngine.Install(root, programs, false, "powershell", resources, settingsPath, false);
+            Check(object.Equals(Json.Get(Json.Parse(System.Text.Encoding.UTF8.GetString(options.Read(settingsPath))), "checkUpdatesOnStart"), false));
+            var oldSettings = System.Text.Encoding.UTF8.GetBytes("{\"enabled\":[\"claude\"],\"alerts\":true,\"customField\":42,\"checkUpdatesOnStart\":false}");
+            options.Files[settingsPath] = oldSettings;
+            optionsEngine.Install(root, programs, true, "powershell", resources, settingsPath, true);
+            var preserved = Json.Parse(System.Text.Encoding.UTF8.GetString(options.Read(settingsPath)));
+            Check(object.Equals(Json.Get(preserved, "checkUpdatesOnStart"), true) && object.Equals(Json.Get(preserved, "alerts"), true));
+            Check(Json.Number(Json.Get(preserved, "customField")) == 42 && Json.Items(Json.Get(preserved, "enabled")).Select(Json.Text).Single() == "claude");
+            var priorOptions = options.Files.ToDictionary(x => x.Key, x => x.Value);
+            options.FailShortcut = true;
+            try { optionsEngine.Install(root, programs, false, "powershell", resources, settingsPath, false); } catch (IOException) { }
+            Check(options.Files.Count == priorOptions.Count && options.Files.All(x => x.Value.SequenceEqual(priorOptions[x.Key])));
+            var freshFail = new Sandbox { FailShortcut = true };
+            try { new InstallEngine(freshFail).Install(root, programs, false, "powershell", resources, settingsPath, false); } catch (IOException) { }
+            Check(freshFail.Files.Count == 0);
+            var invalid = new Sandbox(); invalid.Files[settingsPath] = System.Text.Encoding.UTF8.GetBytes("[]");
+            bool invalidRejected = false;
+            try { new InstallEngine(invalid).Install(root, programs, false, "powershell", resources, settingsPath, false); } catch (InvalidDataException) { invalidRejected = true; }
+            Check(invalidRejected && invalid.Files.Count == 1 && System.Text.Encoding.UTF8.GetString(invalid.Read(settingsPath)) == "[]");
             Check(InstalledAppLauncher.TryStart("test-app", path => { }) == LaunchOutcome.Started);
             foreach (int code in new[] { 1260, 577, 4551 })
                 Check(InstalledAppLauncher.TryStart("test-app", path => { throw new Win32Exception(code); }) == LaunchOutcome.BlockedByPolicy);

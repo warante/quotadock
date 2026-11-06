@@ -8,7 +8,7 @@ Tus cuotas de IA junto al reloj, sin llenar la bandeja de iconos. Pulsa para cam
 
 **Windows 10/11 · MIT · Portable o instalable · Sin administrador**
 
-**Versión 1.4.0**, con restablecimientos compactos, aviso de nuevas versiones y actualización siempre confirmada por el usuario. Descarga la versión publicada en **[Releases](https://github.com/warante/quotadock/releases/latest)**; `main` puede incorporar cambios posteriores.
+**Versión 1.4.1**, con opción de desactivar las consultas automáticas a GitHub desde el instalador, antes del primer arranque. Conserva los restablecimientos compactos, el aviso de nuevas versiones y la actualización siempre confirmada por el usuario. Descarga la versión publicada en **[Releases](https://github.com/warante/quotadock/releases/latest)**; `main` puede incorporar cambios posteriores.
 
 <p align="center">
   <img src="docs/images/quotadock-preview.png" alt="QuotaDock con un único icono junto al reloj y pestañas para cambiar entre OpenAI, Claude y Kimi" width="880">
@@ -41,7 +41,7 @@ También puedes cambiar desde **clic derecho → Proveedor visible**. Las flecha
 
 ## Descargar
 
-En **[Releases](https://github.com/warante/quotadock/releases/latest)** encontrarás la última versión publicada. Los scripts de 1.4.0 generan sus artefactos en `dist\v1.4.0`:
+En **[Releases](https://github.com/warante/quotadock/releases/latest)** encontrarás la última versión publicada. Los scripts de 1.4.1 generan sus artefactos en `dist\v1.4.1`:
 
 | Artefacto | Uso |
 | --- | --- |
@@ -58,6 +58,7 @@ El instalador usa `%LOCALAPPDATA%\QuotaDock`, crea un acceso en Inicio y registr
 
 - **Clic derecho → Buscar actualizaciones…** consulta la última release estable oficial de GitHub. No se instalan versiones iguales, anteriores, borradores ni prereleases.
 - **Buscar nuevas versiones al iniciar**, activado por defecto y desactivable en el menú, comprueba una vez por arranque. Solo muestra un aviso si hay una versión nueva; no descarga ni instala por sí solo. Los fallos de red no interrumpen el inicio.
+- Desde el instalador de **1.4.1** también puedes desmarcar esa comprobación **antes de abrir la aplicación**. Se muestra la elección existente al actualizar; solo se modifica ese ajuste, conservando los demás. Si los ajustes no se pueden leer, se evita sobrescribirlos.
 - Al encontrar una versión nueva, la opción pasa a **Actualizar a …**. Siempre pide permiso antes de descargar y abrir el instalador; cancelar o responder «No» no modifica la instalación.
 - El instalador vuelve a pedir confirmación para sustituir una instalación existente. Después solicita el cierre ordenado de esa instancia, actualiza y vuelve a abrirla si está marcada la opción correspondiente. Conserva claves, proveedores, preferencias e inicio automático.
 - **Migración desde 1.3.0 y anteriores:** estas versiones no incorporan el nuevo cierre cooperativo ni el buscador de actualizaciones. La primera vez hay que descargar el nuevo instalador y cerrar la aplicación manualmente. No se fuerzan procesos ni se detienen copias portables.
@@ -159,7 +160,7 @@ En modo portable, desactiva primero el inicio automático, sal y borra el ejecut
 Requisitos: Windows 10/11 y .NET Framework 4.x; sin Python, Node, NuGet ni SDK moderno de .NET.
 
 ```powershell
-.\build.ps1          # dist\v1.4.0\QuotaDock.exe
+.\build.ps1          # dist\v1.4.1\QuotaDock.exe
 .\test.ps1           # pruebas sintéticas, HTTP simulado, DPAPI e instalación aislada
 .\release.ps1        # aplicación, instalador, ZIP y SHA-256
 .\package-test.ps1   # recursos del instalador y desinstalación en sandbox
