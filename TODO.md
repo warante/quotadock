@@ -23,7 +23,8 @@ Objetivo: estudiar la admisión en **SignPath Foundation**, no generar un certif
 - [x] Preparar texto de solicitud, configuración de artefactos y plantilla de firma en dos etapas con aprobación manual; sin claves privadas en el repositorio.
 - [ ] El propietario debe completar el formulario, MFA, cuenta/app de SignPath y la configuración real de políticas, aprobadores y entorno protegido.
 - [x] Revisar condiciones de SignPath y preparar en 1.4.1 la opción del instalador para desactivar consultas automáticas de versiones antes del primer arranque.
-- [ ] Publicar 1.4.1 y confirmar MFA en GitHub antes de presentar la solicitud. No se ha enviado el formulario ni se han aceptado términos en nombre del propietario.
+- [x] Publicar [1.4.1](https://github.com/warante/quotadock/releases/tag/v1.4.1) tras el [PR #3](https://github.com/warante/quotadock/pull/3), pruebas completas correctas en CI y validación de hashes y notas de release. Se distribuyen los artefactos compilados en GitHub Actions.
+- [ ] Confirmar MFA en GitHub antes de presentar la solicitud. No se ha enviado el formulario ni se han aceptado términos en nombre del propietario.
 - [ ] Actualizar las instrucciones de distribución una vez que exista una firma real y verificable. No prometer que desaparecerán todas las advertencias de Windows.
 
 ## 3. Integración en Piconera Tech

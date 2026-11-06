@@ -6,11 +6,15 @@ Revisión de requisitos: **6 de noviembre de 2026, hora peninsular española**. 
 
 **No enviada.** El repositorio y las releases son públicos, pero eso no constituye una admisión. La vía de la fundación permite firmar con un certificado emitido a nombre de **SignPath Foundation**; no entrega una clave privada ni un certificado personal al mantenedor.
 
+## Preparación técnica publicada
+
+La corrección [1.4.1](https://github.com/warante/quotadock/releases/tag/v1.4.1) ya está publicada: permite desactivar desde el instalador la consulta automática a GitHub antes del primer arranque, conserva el resto de ajustes y restaura el archivo previo si falla la instalación. En 1.4.0 esa opción solo estaba en el menú de la aplicación.
+
+El [PR #3](https://github.com/warante/quotadock/pull/3) está fusionado. Las pruebas completas han pasado en GitHub Actions tanto en el PR como en [main](https://github.com/warante/quotadock/actions/runs/42285571398), incluidos conservación de ajustes, desactivación inicial y rollback. Los artefactos publicados proceden de ese build de CI; se comprobaron los hashes locales/remotos, el manifiesto y la codificación de las notas. El bloqueo local de los ejecutables de pruebas por Windows no se ha eludido ni se presenta como una ejecución local correcta.
+
 Pendientes antes de presentarla:
 
 - Confirmar MFA en GitHub en https://github.com/settings/security. No se ha podido verificar desde la API. Nunca facilitar códigos, contraseñas ni claves de recuperación en el repositorio o el formulario del proyecto.
-- Publicar la corrección **1.4.1**, actualmente local: permite desactivar desde el instalador la consulta automática a GitHub antes del primer arranque. En la release 1.4.0 esa opción solo está en el menú de la aplicación. La opción del instalador conserva ajustes existentes y participa en el rollback.
-- Verificar las pruebas de esa corrección en un entorno autorizado (por ejemplo, GitHub Actions). La compilación, los recursos del instalador, la desinstalación en sandbox y las auditorías locales son correctos; el Control de aplicaciones de Windows bloqueó el ejecutable de pruebas. No se han dado esas pruebas por superadas ni se ha eludido el bloqueo.
 - El propietario debe revisar y aceptar los términos, indicar sus datos de contacto directamente en el formulario y confirmar el envío. No se han rellenado ni enviado datos personales.
 - Preparar señales verificables de mantenimiento y uso; no inventar usuarios, descargas, reviews ni reputación. SignPath puede rechazar o posponer la admisión de un proyecto reciente.
 
@@ -40,7 +44,7 @@ Pendientes antes de presentarla:
 
 **Description:** A lightweight Windows system-tray utility that displays remaining AI subscription quotas using one icon, a provider selector and two progress bars. Quota queries are restricted to providers enabled by the user. The application can also check the public GitHub releases API on startup or on manual request; this sends the source IP and application version to GitHub, but no provider credentials or cookies. Downloads and replacement of an existing installation require explicit confirmation. It has no analytics or telemetry, reads official client sessions without modifying them and encrypts manually supplied credentials with Windows DPAPI.
 
-**Privacy prerequisite, do not omit while pending:** The published 1.4.0 release allows disabling startup update checks in the application menu. A local 1.4.1 patch adds that choice to the installer before first launch. Publish and verify this patch before claiming that the installer offers this option. See the [privacy policy](PRIVACY.md).
+**Privacy controls:** Published release 1.4.1 lets the user disable startup update checks in the installer before first launch, as well as in the application menu. The installer explains that GitHub receives the source IP and application version. Existing preferences are preserved, and the previous settings file is restored if installation fails. See the [privacy policy](PRIVACY.md).
 
 **Distribution:** Per-user EXE installer and standalone portable EXE/ZIP. Installation and uninstallation are documented. Source, native UI previews, synthetic tests and release hashes are available in the repository. Existing releases are unsigned.
 
