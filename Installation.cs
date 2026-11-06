@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Diagnostics;
 using System.Threading;
+using System.Text;
 using Microsoft.Win32;
 
 namespace UsageTray
@@ -62,13 +63,24 @@ namespace UsageTray
     {
         private readonly IInstallPlatform platform;
         public InstallEngine(IInstallPlatform platform) { this.platform = platform; }
-        public void Install(string root, string programs, bool startup, string powershell, Func<string, byte[]> resource)
+        public void Install(string root, string programs, bool startup, string powershell, Func<string, byte[]> resource, string settingsPath = null, bool? checkUpdatesOnStart = null)
         {
+            if ((settingsPath == null) != (!checkUpdatesOnStart.HasValue)) throw new ArgumentException("Incomplete installation preferences.");
             string target = Path.Combine(root, "QuotaDock.exe");
             string uninstall = Path.Combine(root, "Uninstall.ps1");
             string[] files = { target, uninstall, Path.Combine(programs, "QuotaDock.lnk"), Path.Combine(programs, "Desinstalar QuotaDock.lnk"), Path.Combine(root, "LICENSE"), Path.Combine(root, "PRIVACY.md") };
             var previous = new Dictionary<string, byte[]>();
             foreach (string path in files) previous[path] = platform.Read(path);
+            byte[] settings = null;
+            if (settingsPath != null)
+            {
+                byte[] old = platform.Read(settingsPath);
+                previous[settingsPath] = old;
+                var values = old == null ? new Dictionary<string, object>() : Json.Parse(Encoding.UTF8.GetString(old).TrimStart('\uFEFF')) as Dictionary<string, object>;
+                if (values == null) throw new InvalidDataException("No se pueden conservar los ajustes existentes.");
+                values["checkUpdatesOnStart"] = checkUpdatesOnStart.Value;
+                settings = Encoding.UTF8.GetBytes(Json.Serialize(values));
+            }
             string oldStartup = platform.Startup;
             var oldRegistration = platform.Registration;
             try
@@ -77,6 +89,9 @@ namespace UsageTray
                 byte[] app = resource("QuotaDock.exe"); byte[] script = resource("Uninstall.ps1");
                 byte[] license = resource("LICENSE"); byte[] privacy = resource("PRIVACY.md");
                 if (app == null || script == null || license == null || privacy == null) throw new InvalidOperationException("Faltan recursos del instalador.");
+                // Persist the installer choice before an application can be launched.
+                // Preserve all other fields, including those unknown to this version.
+                if (settingsPath != null) platform.Write(settingsPath, settings);
                 platform.Write(target, app); platform.Write(uninstall, script);
                 platform.Write(files[4], license); platform.Write(files[5], privacy);
                 platform.Shortcut(files[2], target, "");
@@ -86,7 +101,7 @@ namespace UsageTray
                 if (startup) platform.Startup = command;
                 else if (platform.Startup == command) platform.Startup = null;
                 platform.Registration = new Dictionary<string, object> {
-                    { "DisplayName", "QuotaDock" }, { "DisplayVersion", "1.4.0" }, { "Publisher", "QuotaDock" },
+                    { "DisplayName", "QuotaDock" }, { "DisplayVersion", "1.4.1" }, { "Publisher", "QuotaDock" },
                     { "InstallLocation", root }, { "DisplayIcon", target },
                     { "UninstallString", "\"" + powershell + "\" " + arguments }, { "NoModify", 1 }, { "NoRepair", 1 }
                 };

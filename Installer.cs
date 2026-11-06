@@ -9,12 +9,13 @@ using UsageTray;
 
 internal sealed class Installer : Form
 {
-    private readonly CheckBox startup = new CheckBox { Text = "Abrir QuotaDock al iniciar Windows", Left = 24, Top = 130, Width = 330 };
-    private readonly CheckBox launch = new CheckBox { Text = "Abrir QuotaDock al finalizar", Checked = true, Left = 24, Top = 160, Width = 330 };
-    private readonly Button install = new Button { Text = "Instalar", Left = 245, Top = 215, Width = 110, Height = 32 };
+    private readonly CheckBox updateChecks = new CheckBox { Text = "Buscar nuevas versiones al iniciar (GitHub)", Checked = true, Left = 24, Top = 130, Width = 400 };
+    private readonly CheckBox startup = new CheckBox { Text = "Abrir QuotaDock al iniciar Windows", Left = 24, Top = 205, Width = 400 };
+    private readonly CheckBox launch = new CheckBox { Text = "Abrir QuotaDock al finalizar", Checked = true, Left = 24, Top = 235, Width = 400 };
+    private readonly Button install = new Button { Text = "Instalar", Left = 310, Top = 285, Width = 110, Height = 32 };
     private Installer()
     {
-        Text = "QuotaDock 1.4.0"; ClientSize = new Size(390, 270);
+        Text = "QuotaDock 1.4.1"; ClientSize = new Size(450, 345);
         FormBorderStyle = FormBorderStyle.FixedDialog; MaximizeBox = false;
         StartPosition = FormStartPosition.CenterScreen; Font = new Font("Segoe UI", 9);
         Controls.Add(new Label { Text = "Un icono, dos barras y todos tus proveedores.\nInstalación por usuario en %LOCALAPPDATA%\\QuotaDock.\nSolo consulta los proveedores que actives. Sin telemetría.", Left = 24, Top = 16, Width = 350, Height = 70 });
@@ -28,7 +29,12 @@ internal sealed class Installer : Form
             }
         };
         Controls.Add(policies);
-        Controls.AddRange(new Control[] { startup, launch, install });
+        Controls.Add(new Label { Text = "GitHub recibe tu IP y la versión de QuotaDock.\nDesmarca la opción para evitar esta consulta automática.\nLas descargas e instalaciones siempre piden confirmación.", Left = 24, Top = 158, Width = 400, Height = 44 });
+        Controls.AddRange(new Control[] { updateChecks, startup, launch, install });
+        var settingsStore = new SettingsStore();
+        bool settingsProblem = false;
+        try { updateChecks.Checked = settingsStore.Load().CheckUpdatesOnStart; }
+        catch { settingsProblem = true; updateChecks.Enabled = false; }
         FormClosing += delegate(object sender, FormClosingEventArgs e) { if (!install.Enabled) e.Cancel = true; };
         string installRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "QuotaDock");
         if (File.Exists(Path.Combine(installRoot, "QuotaDock.exe")))
@@ -37,6 +43,7 @@ internal sealed class Installer : Form
             try { startup.Checked = new WindowsInstallPlatform().Startup == "\"" + Path.Combine(installRoot, "QuotaDock.exe") + "\""; } catch { }
         }
         install.Click += async delegate {
+            if (settingsProblem) { MessageBox.Show("No se pueden leer los ajustes de QuotaDock. No se han modificado. Revisa el archivo settings.json antes de actualizar para no perder tus preferencias.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
             install.Enabled = false;
             string root = installRoot;
             try
@@ -50,7 +57,7 @@ internal sealed class Installer : Form
                 }
                 string programs = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs), "QuotaDock");
                 string powershell = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "WindowsPowerShell", "v1.0", "powershell.exe");
-                new InstallEngine(new WindowsInstallPlatform()).Install(root, programs, startup.Checked, powershell, Resource);
+                new InstallEngine(new WindowsInstallPlatform()).Install(root, programs, startup.Checked, powershell, Resource, Path.Combine(settingsStore.DirectoryPath, "settings.json"), updateChecks.Checked);
             }
             catch { MessageBox.Show("La instalación no se ha completado. Se ha intentado restaurar el estado anterior. Cierra QuotaDock antes de actualizar y comprueba los permisos de tu perfil.", Text, MessageBoxButtons.OK, MessageBoxIcon.Error); install.Enabled = true; return; }
 

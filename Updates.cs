@@ -22,7 +22,7 @@ namespace UsageTray
 
     public static class Updates
     {
-        public const string CurrentVersion = "1.4.0";
+        public const string CurrentVersion = "1.4.1";
         public const string LatestApi = "https://api.github.com/repos/warante/quotadock/releases/latest";
         internal const int MaxInstallerBytes = 16 * 1024 * 1024;
         public static HttpClient CreateClient()
